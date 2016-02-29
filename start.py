@@ -2,10 +2,14 @@ from tkinter import *
 
 from datetime import * #tzinfo, date, timedelta
 
-from tarifi import *
+#from tarifi import *
 from calc import *
 from saves import *
 #from graph import *
+
+import pickle
+import urllib.request
+import re
 
 
 root = Tk()
@@ -16,14 +20,93 @@ root['bg'] = 'grey90'
 date_now = datetime.strftime(datetime.now(), "%d.%m.%Y") #%H:%M:%S
 
 calc_end = []
-date_tarifiv = date_tarifiv
-mt1 = mt1
-mt2 = mt2
-t1 = t1
-t2 = t2
-t3 = t3
 
 
+print('tarifi_local')
+fares_start = pickle.load(open('fares_start', 'rb'))
+
+mt1 = fares_start[0]
+mt2 = fares_start[1]    
+t1 = float(fares_start[2])
+t2 = float(fares_start[3])
+t3 = float(fares_start[4])
+date_fares = fares_start[5]
+
+
+def read_fares():
+    print('read_fares')
+    #Зчитуємо дані введених тарифних меж
+    mt1 = int(ent7.get())#__main__.ent7.get()
+    mt2 = int(ent9.get())
+    #Зчитуємо дані введених тарифів
+    t1 = float(ent4.get())
+    t2 = float(ent5.get())
+    t3 = float(ent6.get())
+    return [mt1, mt2, t1, t2, t3, date_now]
+
+
+def save_fares(event):
+    fares = read_fares()
+    print('save_tarifi')
+    pickle.dump(fares, open('fares_start', 'wb'))
+
+
+def fares_inet(event):
+    print('fares_inet')
+    try:
+        u_o = urllib.request.urlopen('http://kyivenergo.ua/odnozonni_lichilniki/')
+        u_o = u_o.read().decode(encoding="utf-8", errors="ignore")
+#        print(u_o)
+        tarifi_all = [tar.replace(',', '.') for tar in re.findall
+                   (r'<td>(\w+.\w+)\W+\w+\W+</tr>', u_o)
+                    ]
+#        print(tarifi_all)
+        tar_meg_1 = re.findall(r'спожитий до (\w+)', u_o)
+        tar_meg_2 = re.findall(r'спожитий понад (\w+)', u_o)
+        mt1 = tar_meg_1[0]# верхня межа тарифу 1
+        mt2 = tar_meg_2[1]# верхня межа тарифу 2
+        t1 = float(tarifi_all[0])/100# тариф 1
+        t2 = float(tarifi_all[1])/100# тариф 2
+        t3 = float(tarifi_all[2])/100# тариф 3
+        
+        write_all_lab(mt1, mt2, t1, t2, t3)
+        write_all_ent(mt1, mt2, t1, t2, t3)
+        
+    except urllib.error.URLError:
+        print('URLError')
+        exec(open('error.py').read())
+    except ValueError:
+        print('ValueError')
+        exec(open('error.py').read())
+
+
+def write_all_lab(mt1, mt2, t1, t2, t3):
+    #Коригуємо значення тарифних меж у відповідності до введених даних
+    lab32.config(text = mt1)
+    lab33.config(text = mt2)
+    lab12.config(text = mt1)
+    lab18.config(text = mt1)
+    lab19.config(text = mt2)
+    lab25.config(text = mt2)
+    #Коригуємо значення тарифів у відповідності до введених даних
+    lab15.config(text = t1)
+    lab22.config(text = t2)
+    lab28.config(text = t3)
+
+    lab6_2.config(text = date_now)
+
+def write_all_ent(mt1, mt2, t1, t2, t3):
+    ent7.delete(0,100)#0,END
+    ent7.insert(0,mt1)#END,k
+    ent9.delete(0,100)#0,END
+    ent9.insert(0,mt2)#END,k
+
+    ent4.delete(0,100)#0,END
+    ent4.insert(0,t1)#END,k
+    ent5.delete(0,100)#0,END
+    ent5.insert(0,t2)#END,k
+    ent6.delete(0,100)#0,END
+    ent6.insert(0,t3)#END,k
    
 root.title("Розрахунок вартості спожитої електроенергії")
 
@@ -57,7 +140,7 @@ lab6 = Label(root, text="Діючі тарифи на електроенергі
              font="Arial 14", bg='grey90')
 lab6_1 = Label(root, text="Дата оновлення тарифів:",\
              font="Arial 10", bg='grey90')
-lab6_2 = Label(root, text=date_tarifiv,\
+lab6_2 = Label(root, text=date_fares,\
              font="Arial 10", bg='grey90')
 lab7 = Label(root, text="за обсяг, спожитий до               кВт∙год електроенергії на місяць (включно):",\
              font="Arial 12", bg='grey90')
@@ -81,13 +164,13 @@ but4 = Button(root,
           text="Оновити через інтернет", font="Arial 10",
           width=20,height=1,
           bg="grey85",fg="black")
-but4.bind("<Button-1>",tarifi_inet)
+but4.bind("<Button-1>",fares_inet)
 #Опис кнопки "Зберегти тарифи"
 but3 = Button(root,
           text="Зберегти тарифи", font="Arial 10",
           width=15,height=1,
           bg="grey85",fg="black")
-but3.bind("<Button-1>",save_tarifi)
+but3.bind("<Button-1>", save_fares)
 
 
 #Опис блоку "Розрахунок вартості."
@@ -185,10 +268,6 @@ ent10.insert(END,date_now)
 
 
 
-
-
-
-
 lab.place(x=50,y=5)
 
 #Розміщення блоку "Спожита електроенергія."
@@ -268,7 +347,7 @@ but.place(x=600,y=a+b*2)
 but1.place(x=800,y=e+f*5)
 
 #Розміщення кнопки "Показати графік"
-but2.place(x=800,y=e+f*6)
+#but2.place(x=800,y=e+f*6)
 
  
 #canv_1 = Canvas(width=1000,height=550, bg = "grey90:50")
