@@ -3,7 +3,7 @@ from tkinter import *
 from datetime import * #tzinfo, date, timedelta
 
 #from tarifi import *
-from calc import *
+#from launch_calc import *
 from saves import *
 #from graph import *
 
@@ -45,9 +45,18 @@ def read_fares():
     return [mt1, mt2, t1, t2, t3, date_now]
 
 
+def read_counter():
+    print('read_counter')
+    #Зчитуємо дані введених показників або к-ть спожитої електроенергії
+    l1 = int(ent1.get())
+    l2 = int(ent2.get())
+    k = int(ent3.get())    
+    return [l1, l2, k]
+
+
 def save_fares(event):
     fares = read_fares()
-    print('save_tarifi')
+    print('save_fares')
     pickle.dump(fares, open('fares_start', 'wb'))
 
 
@@ -69,8 +78,8 @@ def fares_inet(event):
         t2 = float(tarifi_all[1])/100# тариф 2
         t3 = float(tarifi_all[2])/100# тариф 3
         
-        write_all_lab(mt1, mt2, t1, t2, t3)
-        write_all_ent(mt1, mt2, t1, t2, t3)
+        write_labs_in(mt1, mt2, t1, t2, t3)
+        write_ents_in(mt1, mt2, t1, t2, t3)
         
     except urllib.error.URLError:
         print('URLError')
@@ -80,7 +89,8 @@ def fares_inet(event):
         exec(open('error.py').read())
 
 
-def write_all_lab(mt1, mt2, t1, t2, t3):
+def write_labs_in(mt1, mt2, t1, t2, t3):
+    print('write_labs_in')
     #Коригуємо значення тарифних меж у відповідності до введених даних
     lab32.config(text = mt1)
     lab33.config(text = mt2)
@@ -95,7 +105,9 @@ def write_all_lab(mt1, mt2, t1, t2, t3):
 
     lab6_2.config(text = date_now)
 
-def write_all_ent(mt1, mt2, t1, t2, t3):
+
+def write_ents_in(mt1, mt2, t1, t2, t3):
+    print('write_ents_in')
     ent7.delete(0,100)#0,END
     ent7.insert(0,mt1)#END,k
     ent9.delete(0,100)#0,END
@@ -107,18 +119,119 @@ def write_all_ent(mt1, mt2, t1, t2, t3):
     ent5.insert(0,t2)#END,k
     ent6.delete(0,100)#0,END
     ent6.insert(0,t3)#END,k
+
+
+def write_labs_out(mt1k, mt2k, mt3k, t1k, t2k, t3k, tk):
+    #Змінюємо значення в поляx виводу
+    lab13.config(text = mt1k)
+    lab20.config(text = mt2k)
+    lab26.config(text = mt3k)
+
+    lab16.config(text = '%.2f'%(t1k))
+    lab23.config(text = '%.2f'%(t2k))
+    lab29.config(text = '%.2f'%(t3k))
+
+    lab31.config(text = '%.2f'%(tk))
+
+
+def calc(mt1, mt2, t1, t2, t3, l1, l2, k):
+    print('calc')
+    #Якщо кількість спожитої електроенергії входить в межі першого тарифу
+    if 0 <= k <= mt1:
+        mt1k = k
+        mt2k = 0
+        mt3k = 0
+        t1k = t1 * k
+        t2k = 0
+        t3k = 0
+        tk = t1k + t2k + t3k
+        
+        write_labs_out(mt1k, mt2k, mt3k, t1k, t2k, t3k, tk)
+            
+    #Якщо кількість спожитої електроенергії входить в межі другого тарифу
+    elif mt1 < k <= mt2:
+        mt1k = mt1
+        mt2k = k-mt1
+        mt3k = 0
+        t1k = t1 * mt1
+        t2k = (k-mt1)*t2
+        t3k = 0   
+        tk = t1k + t2k + t3k
+        
+        write_labs_out(mt1k, mt2k, mt3k, t1k, t2k, t3k, tk)
+
+    #Якщо кількість спожитої електроенергії входить в межі третього тарифу
+    elif mt2 < k:
+        mt1k = mt1
+        mt2k = mt2-mt1
+        mt3k = k - mt2
+        t1k = t1 * mt1
+        t2k = (mt2-mt1)*t2
+        t3k = (k-mt2)*t3   
+        tk = t1k + t2k + t3k
+        
+        write_labs_out(mt1k, mt2k, mt3k, t1k, t2k, t3k, tk)
+
+    else:
+        exec(open('error.py').read())
+    get_history(mt1, mt2, t1, t2, t3, l1, l2, k, t1k, t2k, t3k, tk)
+
+def get_history(mt1, mt2, t1, t2, t3, l1, l2, k, t1k, t2k, t3k, tk):
+    date = ent10.get()
+    calc_end =[date, date_now,
+               '%.0f'%(mt1), '%.0f'%(mt2),
+               '%.3f'%(t1), '%.3f'%(t2), '%.3f'%(t3),
+               '%.0f'%(l1), '%.0f'%(l2), '%.0f'%(k),
+               '%.2f'%(t1k), '%.2f'%(t2k), '%.2f'%(t3k), '%.2f'%(tk)
+               ]
+    h = open('history.txt', 'a')
+    h.write(str(calc_end)+"r \n")
+    h.close()
+
+
+#Функція, що викликається кнопкою "Розрахувати"
+def launch_calc(event):
+    #Зчитуємо дані введених тарифних меж та тарифів
+    fares = read_fares()
+    mt1 = fares[0]
+    mt2 = fares[1]
+    t1 = fares[2]
+    t2 = fares[3]
+    t3 = fares[4]
+    print(fares)
+    #Коригуємо значення тарифних меж та тарифів у відповідності до введених даних
+    write_labs_in(mt1, mt2, t1, t2, t3)
+    #Зчитуємо дані введених показників або к-ть спожитої електроенергії
+    counter_reads = read_counter()
+    print(counter_reads)
+    l1 = counter_reads[0]
+    l2 = counter_reads[1]
+    k = counter_reads[2]
+    print('launch_calc')
+    if l1 < 0 or l2 < 0 or mt1 > mt2:
+        exec(open('error.py').read())
+    #Якщо показники лічильника не введені, то використовуємо введену кількість
+    #спожитої електроенергії
+    elif l1 == 0 and l2 == 0 :
+        calc(mt1, mt2, t1, t2, t3, l1, l2, k)
+    else:
+        k = l2 - l1
+        ent3.delete(0,100)#0,END
+        ent3.insert(0,k)#END,k
+        calc(mt1, mt2, t1, t2, t3, l1, l2, k)
+        
+    
+
    
 root.title("Розрахунок вартості спожитої електроенергії")
-
-
 #canv = Canvas(width=1000,height=550,bg='grey90')
 #canv.grid(row=0, column=0)#pack()
 
-lab = Label(root, text="Розрахунок вартості спожитої електроенергії для однозонного лічильника.",\
-             font="Arial 16", bg='grey90')
+Central_title = Label(root, text="Розрахунок вартості спожитої електроенергії для однозонного лічильника.", \
+                      font="Arial 16", bg='grey90')
+
 
 #Опис блоку "Спожита електроенергія."
-
 lab1 = Label(root, text="Спожита електроенергія.",\
              font="Arial 14", bg='grey90')
 lab2 = Label(root, text="Введіть попередні значення лічильника електроенергії:",\
@@ -159,12 +272,14 @@ lab32 = Label(root, text=mt1,\
              font="Arial 12", bg='grey90')
 lab33 = Label(root, text=mt2,\
              font="Arial 12", bg='grey90')
+
 #Опис кнопки "Оновити через інтернет"
 but4 = Button(root,
           text="Оновити через інтернет", font="Arial 10",
           width=20,height=1,
           bg="grey85",fg="black")
 but4.bind("<Button-1>",fares_inet)
+
 #Опис кнопки "Зберегти тарифи"
 but3 = Button(root,
           text="Зберегти тарифи", font="Arial 10",
@@ -227,13 +342,12 @@ lab34 = Label(root,text="Дата занесення показів:",\
              font="Arial 12", bg='grey90')
 ent10 = Entry(root,width=10,bd=3)
 
-
 #Опис кнопки "Розрахувати"
 but = Button(root,
           text="Розрахувати", font="Arial 18",
           width=15,height=3,
           bg="lightgreen",fg="blue")
-but.bind("<Button-1>",calc)
+but.bind("<Button-1>",launch_calc)
 
 #Опис кнопки "Зберегти внесені дані в файл"
 but1 = Button(root,
@@ -268,7 +382,7 @@ ent10.insert(END,date_now)
 
 
 
-lab.place(x=50,y=5)
+Central_title.place(x=50, y=5)
 
 #Розміщення блоку "Спожита електроенергія."
 a = 150
