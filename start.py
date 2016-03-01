@@ -36,12 +36,12 @@ date_fares = fares_start[5]
 def read_fares():
     print('read_fares')
     #Зчитуємо дані введених тарифних меж
-    mt1 = int(ent7.get())#__main__.ent7.get()
-    mt2 = int(ent9.get())
+    mt1 = int(ent_limit_tariff_1.get())#__main__.ent7.get()
+    mt2 = int(ent_limit_tariff_2.get())
     #Зчитуємо дані введених тарифів
-    t1 = float(ent4.get())
-    t2 = float(ent5.get())
-    t3 = float(ent6.get())
+    t1 = float(ent_tariff_1.get())
+    t2 = float(ent_tariff_2.get())
+    t3 = float(ent_tariff_3.get())
     return [mt1, mt2, t1, t2, t3, date_now]
 
 
@@ -92,8 +92,8 @@ def fares_inet(event):
 def write_labs_in(mt1, mt2, t1, t2, t3):
     print('write_labs_in')
     #Коригуємо значення тарифних меж у відповідності до введених даних
-    lab32.config(text = mt1)
-    lab33.config(text = mt2)
+    lab_limit_tariff_1.config(text = mt1)
+    lab_limit_tariff_2.config(text = mt2)
     lab12.config(text = mt1)
     lab18.config(text = mt1)
     lab19.config(text = mt2)
@@ -103,22 +103,22 @@ def write_labs_in(mt1, mt2, t1, t2, t3):
     lab22.config(text = t2)
     lab28.config(text = t3)
 
-    lab6_2.config(text = date_now)
+    lab_date_saving_fares.config(text = date_now)
 
 
 def write_ents_in(mt1, mt2, t1, t2, t3):
     print('write_ents_in')
-    ent7.delete(0,100)#0,END
-    ent7.insert(0,mt1)#END,k
-    ent9.delete(0,100)#0,END
-    ent9.insert(0,mt2)#END,k
+    ent_limit_tariff_1.delete(0, 100)#0,END
+    ent_limit_tariff_1.insert(0, mt1)#END,k
+    ent_limit_tariff_2.delete(0, 100)#0,END
+    ent_limit_tariff_2.insert(0, mt2)#END,k
 
-    ent4.delete(0,100)#0,END
-    ent4.insert(0,t1)#END,k
-    ent5.delete(0,100)#0,END
-    ent5.insert(0,t2)#END,k
-    ent6.delete(0,100)#0,END
-    ent6.insert(0,t3)#END,k
+    ent_tariff_1.delete(0, 100)#0,END
+    ent_tariff_1.insert(0, t1)#END,k
+    ent_tariff_2.delete(0, 100)#0,END
+    ent_tariff_2.insert(0, t2)#END,k
+    ent_tariff_3.delete(0, 100)#0,END
+    ent_tariff_3.insert(0, t3)#END,k
 
 
 def write_labs_out(mt1k, mt2k, mt3k, t1k, t2k, t3k, tk):
@@ -271,16 +271,16 @@ Central_title = Label(root, text="Розрахунок вартості спож
 
 
 #Опис блоку "Спожита електроенергія."
-lab1 = Label(root, text="Спожита електроенергія.",\
-             font="Arial 14", bg='grey90')
-lab2 = Label(root, text="Введіть попередні значення лічильника електроенергії:",\
-             font="Arial 12", bg='grey90')
-lab3 = Label(root, text="Введіть поточні значення лічильника електроенергії:",\
-             font="Arial 12", bg='grey90')
-lab4 = Label(root, text="АБО",\
-             font="Arial 12", bg='grey90')
-lab5 = Label(root, text="Введіть кількість спожитої електроенергії, кВт∙год:",\
-             font="Arial 12", bg='grey90')
+header_of_block_consumption = Label(root, text="Спожита електроенергія.", \
+                                    font="Arial 14", bg='grey90')
+lab_previous_shows = Label(root, text="Введіть попередні значення лічильника електроенергії:", \
+                           font="Arial 12", bg='grey90')
+lab_current_shows = Label(root, text="Введіть поточні значення лічильника електроенергії:", \
+                          font="Arial 12", bg='grey90')
+lab_or = Label(root, text="АБО", \
+               font="Arial 12", bg='grey90')
+lab_amount_of_electricity = Label(root, text="Введіть кількість спожитої електроенергії, кВт∙год:", \
+                                  font="Arial 12", bg='grey90')
 
 ent1 = Entry(root,width=20,bd=3)
 ent2 = Entry(root,width=20,bd=3)
@@ -288,51 +288,52 @@ ent3 = Entry(root,width=20,bd=3)
 
 
 #Опис блоку "Діючі тарифи на електроенергію, грн. за 1 кВтгод."
-lab6 = Label(root, text="Діючі тарифи на електроенергію, грн. за 1 кВт∙год.",\
-             font="Arial 14", bg='grey90')
-lab6_1 = Label(root, text="Дата оновлення тарифів:",\
-             font="Arial 10", bg='grey90')
-lab6_2 = Label(root, text=date_fares,\
-             font="Arial 10", bg='grey90')
-lab7 = Label(root, text="за обсяг, спожитий до               кВт∙год електроенергії на місяць (включно):",\
-             font="Arial 12", bg='grey90')
-lab8 = Label(root, text="за обсяг, спожитий понад               кВт∙год до               кВт∙год електроенергії на місяць (включно):",\
-             font="Arial 12", bg='grey90')
-lab9 = Label(root, text="за обсяг, спожитий понад               кВт∙год електроенергії на місяць:",\
-             font="Arial 12", bg='grey90')
+header_of_block_fares = Label(root, text="Діючі тарифи на електроенергію, грн. за 1 кВт∙год.", \
+                              font="Arial 14", bg='grey90')
+lab_pointer_date_saving_fares = Label(root, text="Дата збереження тарифів:", \
+                                      font="Arial 10", bg='grey90')
+lab_date_saving_fares = Label(root, text=date_fares, \
+                              font="Arial 10", bg='grey90')
+lab_pointer_tariff_1 = Label(root, text="за обсяг, спожитий до               кВт∙год електроенергії на місяць (включно):", \
+                             font="Arial 12", bg='grey90')
+lab_pointer_tariff_2 = Label(root, text="за обсяг, спожитий понад               кВт∙год до               кВт∙год електроенергії на місяць (включно):", \
+                             font="Arial 12", bg='grey90')
+lab_pointer_tariff_3 = Label(root, text="за обсяг, спожитий понад               кВт∙год електроенергії на місяць:", \
+                             font="Arial 12", bg='grey90')
 
-ent4 = Entry(root,width=5,bd=3)
-ent5 = Entry(root,width=5,bd=3)
-ent6 = Entry(root,width=5,bd=3)
+ent_tariff_1 = Entry(root, width=5, bd=3)
+ent_tariff_2 = Entry(root, width=5, bd=3)
+ent_tariff_3 = Entry(root, width=5, bd=3)
 
-ent7 = Entry(root,width=5,bd=3)
-ent9 = Entry(root,width=5,bd=3)
-lab32 = Label(root, text=mt1,\
-             font="Arial 12", bg='grey90')
-lab33 = Label(root, text=mt2,\
-             font="Arial 12", bg='grey90')
+ent_limit_tariff_1 = Entry(root, width=5, bd=3)
+ent_limit_tariff_2 = Entry(root, width=5, bd=3)
+lab_limit_tariff_1 = Label(root, text=mt1, \
+                           font="Arial 12", bg='grey90')
+lab_limit_tariff_2 = Label(root, text=mt2, \
+                           font="Arial 12", bg='grey90')
 
 #Опис кнопки "Оновити через інтернет"
-but4 = Button(root,
-          text="Оновити через інтернет", font="Arial 10",
-          width=20,height=1,
-          bg="grey85",fg="black")
-but4.bind("<Button-1>",fares_inet)
+but_update_via_internet = Button(root,
+                                 text="Оновити через інтернет", font="Arial 10",
+                                 width=20, height=1,
+                                 bg="grey85", fg="black")
+but_update_via_internet.bind("<Button-1>", fares_inet)
 
 #Опис кнопки "Зберегти тарифи"
-but3 = Button(root,
-          text="Зберегти тарифи", font="Arial 10",
-          width=15,height=1,
-          bg="grey85",fg="black")
-but3.bind("<Button-1>", save_fares)
+but_save_fares = Button(root,
+                        text="Зберегти тарифи", font="Arial 10",
+                        width=15, height=1,
+                        bg="grey85", fg="black")
+but_save_fares.bind("<Button-1>", save_fares)
 
 
 #Опис блоку "Розрахунок вартості."
-lab10 = Label(root, text="Розрахунок вартості.",\
-             font="Arial 14", bg='grey90')
+header_of_block_cost_calculation = Label(root, text="Розрахунок вартості.", \
+                                         font="Arial 14", bg='grey90')
 
-lab11 = Label(root, text="обсяг, спожитий до               кВт∙год електроенергії на місяць (включно):",\
-             font="Arial 12", bg='grey90')
+lab_pointer_amount_on_tariff_1 = Label(root, text="обсяг, спожитий до               кВт∙год електроенергії " \
+                                                  "на місяць (включно):", \
+                                       font="Arial 12", bg='grey90')
 lab12 = Label(root, text=mt1,\
              font="Arial 12", bg='grey90')
 lab13 = Label(root, text="99",\
@@ -410,11 +411,11 @@ ent2.insert(END,0)
 ent3.insert(END,0)
 #ent4,ent5,ent6 вносяться з модуля tarifi
 
-ent4.insert(END,t1)#0.456
-ent5.insert(END,t2)#0.789
-ent6.insert(END,t3)#1.479
-ent7.insert(END,mt1)#100
-ent9.insert(END,mt2)#600
+ent_tariff_1.insert(END, t1)#0.456
+ent_tariff_2.insert(END, t2)#0.789
+ent_tariff_3.insert(END, t3)#1.479
+ent_limit_tariff_1.insert(END, mt1)#100
+ent_limit_tariff_2.insert(END, mt2)#600
 ent10.insert(END,date_now)
 
 
@@ -426,11 +427,11 @@ Central_title.place(x=50, y=5)
 #Розміщення блоку "Спожита електроенергія."
 a = 150
 b = 30
-lab1.place(x=70,y=a+b)
-lab2.place(x=10,y=a+b*2)
-lab3.place(x=10,y=a+b*3)
-lab4.place(x=300,y=a+b*4)
-lab5.place(x=10,y=a+b*5)
+header_of_block_consumption.place(x=70, y=a + b)
+lab_previous_shows.place(x=10, y=a + b * 2)
+lab_current_shows.place(x=10, y=a + b * 3)
+lab_or.place(x=300, y=a + b * 4)
+lab_amount_of_electricity.place(x=10, y=a + b * 5)
 
 ent1.place(x=450,y=a+b*2)
 ent2.place(x=450,y=a+b*3)
@@ -440,32 +441,32 @@ ent3.place(x=450,y=a+b*5)
 #Розміщення блоку "Діючі тарифи на електроенергію, грн. за 1 кВтгод."
 c = 50
 d = 30
-lab6.place(x=70,y=c)
-lab6_1.place(x=720,y=c)
-lab6_2.place(x=880,y=c)
-lab7.place(x=10,y=c+d)
-lab8.place(x=10,y=c+d*2)
-lab9.place(x=10,y=c+d*3)
+header_of_block_fares.place(x=70, y=c)
+lab_pointer_date_saving_fares.place(x=720, y=c)
+lab_date_saving_fares.place(x=880, y=c)
+lab_pointer_tariff_1.place(x=10, y=c + d)
+lab_pointer_tariff_2.place(x=10, y=c + d * 2)
+lab_pointer_tariff_3.place(x=10, y=c + d * 3)
 
-ent4.place(x=720,y=c+d)
-ent5.place(x=720,y=c+d*2)
-ent6.place(x=720,y=c+d*3)
+ent_tariff_1.place(x=720, y=c + d)
+ent_tariff_2.place(x=720, y=c + d * 2)
+ent_tariff_3.place(x=720, y=c + d * 3)
 
-ent7.place(x=180,y=c+d)
-lab32.place(x=205,y=c+d*2)
-ent9.place(x=340,y=c+d*2)
-lab33.place(x=205,y=c+d*3)
+ent_limit_tariff_1.place(x=180, y=c + d)
+lab_limit_tariff_1.place(x=205, y=c + d * 2)
+ent_limit_tariff_2.place(x=340, y=c + d * 2)
+lab_limit_tariff_2.place(x=205, y=c + d * 3)
 #Розміщення кнопки "Оновити через інтернет"
-but4.place(x=820,y=c+d)
+but_update_via_internet.place(x=820, y=c + d)
 #Розміщення кнопки "Зберегти тарифи"
-but3.place(x=820,y=c+d*2)
+but_save_fares.place(x=820, y=c + d * 2)
 
 #Розміщення блоку "Розрахунок вартості."
 e = 340
 f = 30
-lab10.place(x=70,y=e)
+header_of_block_cost_calculation.place(x=70, y = e)
 
-lab11.place(x=10,y=e+f)
+lab_pointer_amount_on_tariff_1.place(x=10, y = e + f)
 lab12.place(x=165,y=e+f)
 lab13.place(x=720,y=e+f)
 lab14.place(x=780,y=e+f)
