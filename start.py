@@ -1,18 +1,11 @@
-from tkinter import *
-
+import tkinter
 from datetime import * #tzinfo, date, timedelta
-
-#from tarifi import *
-#from launch_calc import *
-#from saves import *
-#from graph import *
-
 import pickle
 import urllib.request
 import re
+import csv
 
-
-root = Tk()
+root = tkinter.Tk()
 root.geometry('1000x550')
 root['bg'] = 'grey90'
 #root.state("zoomed") #запускаэться у розгорнутому вікні
@@ -182,30 +175,16 @@ def calc(limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3,
                 amount_of_money_in_tariff_1, amount_of_money_in_tariff_2, amount_of_money_in_tariff_3, total_amount_of_money
                 )
 
-def get_history(limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3,
-                previous_shows, current_shows, amount_of_electricity,
-                amount_of_money_in_tariff_1, amount_of_money_in_tariff_2, amount_of_money_in_tariff_3, total_amount_of_money
-                ):
-    date = ent_date_introduction_fares.get()
-    calc_end =[date, date_now,
-               '%.0f' % (limit_tariff_1), '%.0f' % (limit_tariff_2),
-               '%.3f' % (tariff_1), '%.3f' % (tariff_2), '%.3f' % (tariff_3),
-               '%.0f' % (previous_shows), '%.0f' % (current_shows), '%.0f' % (amount_of_electricity),
-               '%.2f' % (amount_of_money_in_tariff_1), '%.2f' % (amount_of_money_in_tariff_2), '%.2f' % (amount_of_money_in_tariff_3), '%.2f' % (total_amount_of_money)
-               ]
-    h = open('history.txt', 'a')
-    h.write(str(calc_end)+"r \n")
-    h.close()
-
 
 #Функція, що викликається кнопкою "Розрахувати"
 def launch_calc(event):
     #Зчитуємо дані введених тарифних меж та тарифів
-    fares = read_fares()
-    limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3, date_fares = fares
-    print(fares)
+    limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3, date_fares = read_fares()
+    print(limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3, date_fares)
+
     #Коригуємо значення тарифних меж та тарифів у відповідності до введених даних
     write_labs_in(limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3)
+
     #Зчитуємо дані введених показників або к-ть спожитої електроенергії
     previous_shows, current_shows, amount_of_electricity = read_counter()
     print(previous_shows, current_shows, amount_of_electricity)
@@ -224,8 +203,24 @@ def launch_calc(event):
         calc(limit_tariff_1, limit_tariff_2,
              tariff_1, tariff_2, tariff_3,
              previous_shows, current_shows, amount_of_electricity)
-        
-    
+
+
+def get_history(limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3,
+                previous_shows, current_shows, amount_of_electricity,
+                amount_of_money_in_tariff_1, amount_of_money_in_tariff_2, amount_of_money_in_tariff_3, total_amount_of_money
+                ):
+    date = ent_date_introduction_fares.get()
+    calc_end =[date, date_now,
+               '%.0f' % (limit_tariff_1), '%.0f' % (limit_tariff_2),
+               '%.3f' % (tariff_1), '%.3f' % (tariff_2), '%.3f' % (tariff_3),
+               '%.0f' % (previous_shows), '%.0f' % (current_shows), '%.0f' % (amount_of_electricity),
+               '%.2f' % (amount_of_money_in_tariff_1), '%.2f' % (amount_of_money_in_tariff_2), '%.2f' % (amount_of_money_in_tariff_3), '%.2f' % (total_amount_of_money)
+               ]
+    h = open('history.txt', 'a')
+    h.write(str(calc_end)+"r \n")
+    h.close()
+    global calc_end
+
 #Функція, що викликається кнопкою "Зберегти в файл"
 def sortByAlphabet_Day(inputStr):
 #    print(inputStr[2:4])
@@ -240,10 +235,10 @@ def sortByAlphabet_Year(inputStr):
 def saves(event):
     print('saves')
     date = ent_date_introduction_fares.get()
-    h = open('history.txt', 'a')
     if len(calc_end) < 2:
         exec(open('error.py').read())
     else:
+        h = open('history.txt', 'a')
         h.write(str(calc_end)+"s \n")
         h.close()
         s = open('saves.txt', 'a')
@@ -266,139 +261,142 @@ def saves(event):
         s.writelines(all_lines)
         s.close()
 
-   
+
 root.title("Розрахунок вартості спожитої електроенергії")
 #canv = Canvas(width=1000,height=550,bg='grey90')
 #canv.grid(row=0, column=0)#pack()
 
-Central_title = Label(root, text="Розрахунок вартості спожитої електроенергії для однозонного лічильника.", \
-                      font="Arial 16", bg='grey90')
-
+Central_title = tkinter.Label(root, text="Розрахунок вартості спожитої електроенергії для однозонного лічильника.",
+                              font="Arial 16", bg='grey90')
 
 #Опис блоку "Спожита електроенергія."
-header_of_block_consumption = Label(root, text="Спожита електроенергія.", \
-                                    font="Arial 14", bg='grey90')
-lab_previous_shows = Label(root, text="Введіть попередні значення лічильника електроенергії:", \
-                           font="Arial 12", bg='grey90')
-lab_current_shows = Label(root, text="Введіть поточні значення лічильника електроенергії:", \
-                          font="Arial 12", bg='grey90')
-lab_or = Label(root, text="АБО", \
-               font="Arial 12", bg='grey90')
-lab_amount_of_electricity = Label(root, text="Введіть кількість спожитої електроенергії, кВт∙год:", \
+header_of_block_consumption = tkinter.Label(root, text="Спожита електроенергія.",
+                                            font="Arial 14", bg='grey90')
+lab_previous_shows = tkinter.Label(root, text="Введіть попередні значення лічильника електроенергії:",
+                                   font="Arial 12", bg='grey90')
+lab_current_shows = tkinter.Label(root, text="Введіть поточні значення лічильника електроенергії:",
                                   font="Arial 12", bg='grey90')
+lab_or = tkinter.Label(root, text="АБО",
+                       font="Arial 12", bg='grey90')
+lab_amount_of_electricity = tkinter.Label(root, text="Введіть кількість спожитої електроенергії, кВт∙год:",
+                                          font="Arial 12", bg='grey90')
 
-ent_previous_shows = Entry(root, width=20, bd=3)
-ent_current_shows = Entry(root, width=20, bd=3)
-ent_amount_of_electricity = Entry(root, width=20, bd=3)
+ent_previous_shows = tkinter.Entry(root, width=20, bd=3)
+ent_current_shows = tkinter.Entry(root, width=20, bd=3)
+ent_amount_of_electricity = tkinter.Entry(root, width=20, bd=3)
 
 
 #Опис блоку "Діючі тарифи на електроенергію, грн. за 1 кВтгод."
-header_of_block_fares = Label(root, text="Діючі тарифи на електроенергію, грн. за 1 кВт∙год.", \
-                              font="Arial 14", bg='grey90')
-lab_pointer_date_saving_fares = Label(root, text="Дата збереження тарифів:", \
+header_of_block_fares = tkinter.Label(root, text="Діючі тарифи на електроенергію, грн. за 1 кВт∙год.",
+                                      font="Arial 14", bg='grey90')
+lab_pointer_date_saving_fares = tkinter.Label(root, text="Дата збереження тарифів:",
+                                              font="Arial 10", bg='grey90')
+lab_date_saving_fares = tkinter.Label(root, text=date_fares,
                                       font="Arial 10", bg='grey90')
-lab_date_saving_fares = Label(root, text=date_fares, \
-                              font="Arial 10", bg='grey90')
-lab_pointer_tariff_1_in = Label(root, text="за обсяг, спожитий до               кВт∙год електроенергії на місяць (включно):", \
-                                font="Arial 12", bg='grey90')
-lab_pointer_tariff_2_in = Label(root, text="за обсяг, спожитий понад               кВт∙год до               кВт∙год електроенергії на місяць (включно):", \
-                                font="Arial 12", bg='grey90')
-lab_pointer_tariff_3_in = Label(root, text="за обсяг, спожитий понад               кВт∙год електроенергії на місяць:", \
-                                font="Arial 12", bg='grey90')
+lab_pointer_tariff_1_in = tkinter.Label(root, text="за обсяг, спожитий до               кВт∙год "\
+                                                   "електроенергії на місяць (включно):",
+                                        font="Arial 12", bg='grey90')
+lab_pointer_tariff_2_in = tkinter.Label(root, text="за обсяг, спожитий понад               кВт∙год "\
+                                                   "до               кВт∙год електроенергії на місяць (включно):",
+                                        font="Arial 12", bg='grey90')
+lab_pointer_tariff_3_in = tkinter.Label(root, text="за обсяг, спожитий понад               кВт∙год "\
+                                                   "електроенергії на місяць:",
+                                        font="Arial 12", bg='grey90')
 
-ent_tariff_1_in = Entry(root, width=5, bd=3)
-ent_tariff_2_in = Entry(root, width=5, bd=3)
-ent_tariff_3_in = Entry(root, width=5, bd=3)
+ent_tariff_1_in = tkinter.Entry(root, width=5, bd=3)
+ent_tariff_2_in = tkinter.Entry(root, width=5, bd=3)
+ent_tariff_3_in = tkinter.Entry(root, width=5, bd=3)
 
-ent_limit_tariff_1_in = Entry(root, width=5, bd=3)
-ent_limit_tariff_2_in = Entry(root, width=5, bd=3)
-lab_limit_tariff_1_in = Label(root, text=limit_tariff_1, \
-                              font="Arial 12", bg='grey90')
-lab_limit_tariff_2_in = Label(root, text=limit_tariff_2, \
-                              font="Arial 12", bg='grey90')
+ent_limit_tariff_1_in = tkinter.Entry(root, width=5, bd=3)
+ent_limit_tariff_2_in = tkinter.Entry(root, width=5, bd=3)
+lab_limit_tariff_1_in = tkinter.Label(root, text=limit_tariff_1,
+                                      font="Arial 12", bg='grey90')
+lab_limit_tariff_2_in = tkinter.Label(root, text=limit_tariff_2,
+                                      font="Arial 12", bg='grey90')
 
 #Опис кнопки "Оновити через інтернет"
-but_update_via_internet = Button(root,
-                                 text="Оновити через інтернет", font="Arial 10",
-                                 width=20, height=1,
-                                 bg="grey85", fg="black")
+but_update_via_internet = tkinter.Button(root,
+                                         text="Оновити через інтернет", font="Arial 10",
+                                         width=20, height=1,
+                                         bg="grey85", fg="black")
 but_update_via_internet.bind("<Button-1>", fares_inet)
 
 #Опис кнопки "Зберегти тарифи"
-but_save_fares = Button(root,
-                        text="Зберегти тарифи", font="Arial 10",
-                        width=15, height=1,
-                        bg="grey85", fg="black")
+but_save_fares = tkinter.Button(root,
+                                text="Зберегти тарифи", font="Arial 10",
+                                width=15, height=1,
+                                bg="grey85", fg="black")
 but_save_fares.bind("<Button-1>", save_fares)
 
 
 #Опис блоку "Розрахунок вартості."
-header_of_block_cost_calculation = Label(root, text="Розрахунок вартості.", \
-                                         font="Arial 14", bg='grey90')
+header_of_block_cost_calculation = tkinter.Label(root, text="Розрахунок вартості.",
+                                                 font="Arial 14", bg='grey90')
 
-lab_pointer_amount_on_tariff_1 = Label(root, text="обсяг, спожитий до               кВт∙год електроенергії " \
-                                                  "на місяць (включно):", \
-                                       font="Arial 12", bg='grey90')
-lab1_limit_tariff_1_out = Label(root, text=limit_tariff_1, \
-                                font="Arial 12", bg='grey90')
-lab_amount_on_tariff_1 = Label(root, text="99", \
-                               font="Arial 12", bg='grey90')
-lab1_mark_x = Label(root, text="x                  =", \
-                    font="Arial 12", bg='grey90')
-lab_tariff_1_out = Label(root, text="0.456", \
-                         font="Arial 12", bg='grey90')
-lab_amount_of_money_in_tariff_1 = Label(root, text="123", \
+lab_pointer_amount_on_tariff_1 = tkinter.Label(root, text="обсяг, спожитий до               кВт∙год електроенергії " \
+                                                  "на місяць (включно):",
+                                               font="Arial 12", bg='grey90')
+lab1_limit_tariff_1_out = tkinter.Label(root, text=limit_tariff_1,
                                         font="Arial 12", bg='grey90')
-
-lab_pointer_amount_on_tariff_2 = Label(root, text="за обсяг, спожитий понад               кВт∙год до               кВт∙год електроенергії на місяць (включно):", \
+lab_amount_on_tariff_1 = tkinter.Label(root, text="99",
                                        font="Arial 12", bg='grey90')
-lab2_limit_tariff_1_out = Label(root, text=limit_tariff_1, \
-                                font="Arial 12", bg='grey90')
-lab1_limit_tariff_2_out = Label(root, text=limit_tariff_2, \
-                                font="Arial 12", bg='grey90')
-lab_amount_on_tariff_2 = Label(root, text="599", \
-                               font="Arial 12", bg='grey90')
-lab2_mark_x = Label(root, text="x                  =", \
-                    font="Arial 12", bg='grey90')
-lab_tariff_2_out = Label(root, text="0.789", \
-                         font="Arial 12", bg='grey90')
-lab_amount_of_money_in_tariff_2 = Label(root, text="456", \
-                                        font="Arial 12", bg='grey90')
+lab1_mark_x = tkinter.Label(root, text="x                  =",
+                            font="Arial 12", bg='grey90')
+lab_tariff_1_out = tkinter.Label(root, text="0.456",
+                                 font="Arial 12", bg='grey90')
+lab_amount_of_money_in_tariff_1 = tkinter.Label(root, text="123",
+                                                font="Arial 12", bg='grey90')
 
-lab_pointer_amount_on_tariff_3 = Label(root, text="обсяг, спожитий понад               кВт∙год електроенергії на місяць:", \
+lab_pointer_amount_on_tariff_2 = tkinter.Label(root, text="за обсяг, спожитий понад               кВт∙год "\
+                                                          "до               кВт∙год електроенергії на місяць (включно):",
+                                               font="Arial 12", bg='grey90')
+lab2_limit_tariff_1_out = tkinter.Label(root, text=limit_tariff_1,
+                                        font="Arial 12", bg='grey90')
+lab1_limit_tariff_2_out = tkinter.Label(root, text=limit_tariff_2,
+                                        font="Arial 12", bg='grey90')
+lab_amount_on_tariff_2 = tkinter.Label(root, text="599",
                                        font="Arial 12", bg='grey90')
-lab2_limit_tariff_2_out = Label(root, text=limit_tariff_2, \
-                                font="Arial 12", bg='grey90')
-lab_amount_on_tariff_3 = Label(root, text="999", \
-                               font="Arial 12", bg='grey90')
-lab3_mark_x = Label(root, text="x                  =", \
-                    font="Arial 12", bg='grey90')
-lab_tariff_3_out = Label(root, text="1.479", \
-                         font="Arial 12", bg='grey90')
-lab_amount_of_money_in_tariff_3 = Label(root, text="798", \
-                                        font="Arial 12", bg='grey90')
+lab2_mark_x = tkinter.Label(root, text="x                  =",
+                            font="Arial 12", bg='grey90')
+lab_tariff_2_out = tkinter.Label(root, text="0.789",
+                                 font="Arial 12", bg='grey90')
+lab_amount_of_money_in_tariff_2 = tkinter.Label(root, text="456",
+                                                font="Arial 12", bg='grey90')
 
-lab_pointer_total_amount_of_money = Label(root, text="Всього:                          грн.", \
+lab_pointer_amount_on_tariff_3 = tkinter.Label(root, text="обсяг, спожитий понад               кВт∙год електроенергії на місяць:",
+                                               font="Arial 12", bg='grey90')
+lab2_limit_tariff_2_out = tkinter.Label(root, text=limit_tariff_2,
+                                        font="Arial 12", bg='grey90')
+lab_amount_on_tariff_3 = tkinter.Label(root, text="999",
+                                       font="Arial 12", bg='grey90')
+lab3_mark_x = tkinter.Label(root, text="x                  =",
+                            font="Arial 12", bg='grey90')
+lab_tariff_3_out = tkinter.Label(root, text="1.479",
+                                 font="Arial 12", bg='grey90')
+lab_amount_of_money_in_tariff_3 = tkinter.Label(root, text="798",
+                                                font="Arial 12", bg='grey90')
+
+lab_pointer_total_amount_of_money = tkinter.Label(root, text="Всього:                          грн.",
+                                                  font="Arial 12", bg='grey90')
+lab_total_amount_of_money = tkinter.Label(root, text="88888",
                                           font="Arial 12", bg='grey90')
-lab_total_amount_of_money = Label(root, text="88888", \
-                                  font="Arial 12", bg='grey90')
 
-lab_date_introduction_fares = Label(root, text="Дата занесення показів:", \
-                                    font="Arial 12", bg='grey90')
-ent_date_introduction_fares = Entry(root, width=10, bd=3)
+lab_date_introduction_fares = tkinter.Label(root, text="Дата занесення показів:",
+                                            font="Arial 12", bg='grey90')
+ent_date_introduction_fares = tkinter.Entry(root, width=10, bd=3)
 
 #Опис кнопки "Розрахувати"
-but_calculation = Button(root,
-                         text="Розрахувати", font="Arial 18",
-                         width=15, height=3,
-                         bg="lightgreen", fg="blue")
+but_calculation = tkinter.Button(root,
+                                 text="Розрахувати", font="Arial 18",
+                                 width=15, height=3,
+                                 bg="lightgreen", fg="blue")
 but_calculation.bind("<Button-1>", launch_calc)
 
 #Опис кнопки "Зберегти внесені дані в файл"
-but_save_in_file = Button(root,
-                          text="Зберегти в файл", font="Arial 10",
-                          width=15, height=1,
-                          bg="lightgreen", fg="blue")
+but_save_in_file = tkinter.Button(root,
+                                  text="Зберегти в файл", font="Arial 10",
+                                  width=15, height=1,
+                                  bg="lightgreen", fg="blue")
 but_save_in_file.bind("<Button-1>", saves)
 
 #Опис кнопки "Показати графік"
@@ -411,17 +409,17 @@ but_save_in_file.bind("<Button-1>", saves)
 
 
 #Внесення в поля значень за умовчуванням
-ent_previous_shows.insert(END, 0)
-ent_current_shows.insert(END, 0)
-ent_amount_of_electricity.insert(END, 0)
+ent_previous_shows.insert(tkinter.END, 0)
+ent_current_shows.insert(tkinter.END, 0)
+ent_amount_of_electricity.insert(tkinter.END, 0)
 #ent4,ent5,ent6 вносяться з модуля tarifi
 
-ent_tariff_1_in.insert(END, tariff_1)#0.456
-ent_tariff_2_in.insert(END, tariff_2)#0.789
-ent_tariff_3_in.insert(END, tariff_3)#1.479
-ent_limit_tariff_1_in.insert(END, limit_tariff_1)#100
-ent_limit_tariff_2_in.insert(END, limit_tariff_2)#600
-ent_date_introduction_fares.insert(END, date_now)
+ent_tariff_1_in.insert(tkinter.END, tariff_1)#0.456
+ent_tariff_2_in.insert(tkinter.END, tariff_2)#0.789
+ent_tariff_3_in.insert(tkinter.END, tariff_3)#1.479
+ent_limit_tariff_1_in.insert(tkinter.END, limit_tariff_1)#100
+ent_limit_tariff_2_in.insert(tkinter.END, limit_tariff_2)#600
+ent_date_introduction_fares.insert(tkinter.END, date_now)
 
 
 
@@ -432,78 +430,78 @@ Central_title.place(x=50, y=5)
 #Розміщення блоку "Спожита електроенергія."
 a = 150
 b = 30
-header_of_block_consumption.place(x=70, y=a + b)
-lab_previous_shows.place(x=10, y=a + b * 2)
-lab_current_shows.place(x=10, y=a + b * 3)
-lab_or.place(x=300, y=a + b * 4)
-lab_amount_of_electricity.place(x=10, y=a + b * 5)
+header_of_block_consumption.place(x = 70, y = a + b)
+lab_previous_shows.place(x = 10, y = a + b * 2)
+lab_current_shows.place(x = 10, y = a + b * 3)
+lab_or.place(x = 300, y = a + b * 4)
+lab_amount_of_electricity.place(x = 10, y = a + b * 5)
 
-ent_previous_shows.place(x=450, y=a + b * 2)
-ent_current_shows.place(x=450, y=a + b * 3)
-ent_amount_of_electricity.place(x=450, y=a + b * 5)
+ent_previous_shows.place(x = 450, y = a + b * 2)
+ent_current_shows.place(x = 450, y = a + b * 3)
+ent_amount_of_electricity.place(x = 450, y = a + b * 5)
 
 
 #Розміщення блоку "Діючі тарифи на електроенергію, грн. за 1 кВтгод."
 c = 50
 d = 30
-header_of_block_fares.place(x=70, y=c)
-lab_pointer_date_saving_fares.place(x=720, y=c)
-lab_date_saving_fares.place(x=880, y=c)
-lab_pointer_tariff_1_in.place(x=10, y=c + d)
-lab_pointer_tariff_2_in.place(x=10, y=c + d * 2)
-lab_pointer_tariff_3_in.place(x=10, y=c + d * 3)
+header_of_block_fares.place(x = 70, y = c)
+lab_pointer_date_saving_fares.place(x = 720, y = c)
+lab_date_saving_fares.place(x = 880, y = c)
+lab_pointer_tariff_1_in.place(x = 10, y = c + d)
+lab_pointer_tariff_2_in.place(x = 10, y = c + d * 2)
+lab_pointer_tariff_3_in.place(x = 10, y = c + d * 3)
 
-ent_tariff_1_in.place(x=720, y=c + d)
-ent_tariff_2_in.place(x=720, y=c + d * 2)
-ent_tariff_3_in.place(x=720, y=c + d * 3)
+ent_tariff_1_in.place(x = 720, y = c + d)
+ent_tariff_2_in.place(x = 720, y = c + d * 2)
+ent_tariff_3_in.place(x = 720, y = c + d * 3)
 
-ent_limit_tariff_1_in.place(x=180, y=c + d)
-lab_limit_tariff_1_in.place(x=205, y=c + d * 2)
-ent_limit_tariff_2_in.place(x=340, y=c + d * 2)
-lab_limit_tariff_2_in.place(x=205, y=c + d * 3)
+ent_limit_tariff_1_in.place(x = 180, y = c + d)
+lab_limit_tariff_1_in.place(x = 205, y = c + d * 2)
+ent_limit_tariff_2_in.place(x = 340, y = c + d * 2)
+lab_limit_tariff_2_in.place(x = 205, y = c + d * 3)
 #Розміщення кнопки "Оновити через інтернет"
-but_update_via_internet.place(x=820, y=c + d)
+but_update_via_internet.place(x = 820, y = c + d)
 #Розміщення кнопки "Зберегти тарифи"
-but_save_fares.place(x=820, y=c + d * 2)
+but_save_fares.place(x = 820, y = c + d * 2)
 
 #Розміщення блоку "Розрахунок вартості."
 e = 340
 f = 30
-header_of_block_cost_calculation.place(x=70, y = e)
+header_of_block_cost_calculation.place(x = 70, y = e)
 
-lab_pointer_amount_on_tariff_1.place(x=10, y = e + f)
-lab1_limit_tariff_1_out.place(x=165, y=e + f)
-lab_amount_on_tariff_1.place(x=720, y=e + f)
-lab1_mark_x.place(x=780, y=e + f)
-lab_tariff_1_out.place(x=800, y=e + f)
-lab_amount_of_money_in_tariff_1.place(x=880, y=e + f)
+lab_pointer_amount_on_tariff_1.place(x = 10, y = e + f)
+lab1_limit_tariff_1_out.place(x = 165, y = e + f)
+lab_amount_on_tariff_1.place(x = 720, y = e + f)
+lab1_mark_x.place(x = 780, y = e + f)
+lab_tariff_1_out.place(x = 800, y = e + f)
+lab_amount_of_money_in_tariff_1.place(x = 880, y = e + f)
 
-lab_pointer_amount_on_tariff_2.place(x=10, y=e + f * 2)
-lab2_limit_tariff_1_out.place(x=205, y=e + f * 2)
-lab1_limit_tariff_2_out.place(x=340, y=e + f * 2)
-lab_amount_on_tariff_2.place(x=720, y=e + f * 2)
-lab2_mark_x.place(x=780, y=e + f * 2)
-lab_tariff_2_out.place(x=800, y=e + f * 2)
-lab_amount_of_money_in_tariff_2.place(x=880, y=e + f * 2)
+lab_pointer_amount_on_tariff_2.place(x = 10, y = e + f * 2)
+lab2_limit_tariff_1_out.place(x = 205, y = e + f * 2)
+lab1_limit_tariff_2_out.place(x = 340, y = e + f * 2)
+lab_amount_on_tariff_2.place(x = 720, y = e + f * 2)
+lab2_mark_x.place(x = 780, y = e + f * 2)
+lab_tariff_2_out.place(x = 800, y = e + f * 2)
+lab_amount_of_money_in_tariff_2.place(x = 880, y = e + f * 2)
 
-lab_pointer_amount_on_tariff_3.place(x=10, y=e + f * 3)
-lab2_limit_tariff_2_out.place(x=185, y=e + f * 3)
-lab_amount_on_tariff_3.place(x=720, y=e + f * 3)
-lab3_mark_x.place(x=780, y=e + f * 3)
-lab_tariff_3_out.place(x=800, y=e + f * 3)
-lab_amount_of_money_in_tariff_3.place(x=880, y=e + f * 3)
+lab_pointer_amount_on_tariff_3.place(x = 10, y = e + f * 3)
+lab2_limit_tariff_2_out.place(x = 185, y = e + f * 3)
+lab_amount_on_tariff_3.place(x = 720, y = e + f * 3)
+lab3_mark_x.place(x = 780, y = e + f * 3)
+lab_tariff_3_out.place(x = 800, y = e + f * 3)
+lab_amount_of_money_in_tariff_3.place(x = 880, y = e + f * 3)
 
-lab_pointer_total_amount_of_money.place(x=800, y=e + f * 4)
-lab_total_amount_of_money.place(x=880, y=e + f * 4)
+lab_pointer_total_amount_of_money.place(x = 800, y = e + f * 4)
+lab_total_amount_of_money.place(x = 880, y = e + f * 4)
 #Розміщення блоку Дата, збереження
-lab_date_introduction_fares.place(x=500, y=e + f * 5)
-ent_date_introduction_fares.place(x=700, y=e + f * 5)
+lab_date_introduction_fares.place(x = 500, y = e + f * 5)
+ent_date_introduction_fares.place(x = 700, y = e + f * 5)
 
 #Розміщення кнопки "Розрахувати"
-but_calculation.place(x=600, y=a + b * 2)
+but_calculation.place(x = 600, y = a + b * 2)
 
 #Розміщення кнопки "Зберегти в файл"
-but_save_in_file.place(x=800, y=e + f * 5)
+but_save_in_file.place(x = 800, y = e + f * 5)
 
 #Розміщення кнопки "Показати графік"
 #but2.place(x=800,y=e+f*6)
