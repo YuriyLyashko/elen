@@ -9,22 +9,13 @@ import csv
 #def start():
 #    t = threading.Thread(target=thred_func)
 
-try:
-    conn = pymysql.connect(host='localhost',
-                           user='root',
-                           password='123456',
-                           db='elen_db')
-    cur = conn.cursor()
-    cur.execute('CREATE TABLE users('
-                'id integer primary key auto_increment, '
-                'user varchar(20) not null, '
-                'password varchar(20) not null)'
-                )
 
-except pymysql.err.InternalError:
-    print('Таблиця вже існує')
-finally:
-    import login
+import administration_db
+adm_db = administration_db.AdminDB()
+print(adm_db.conn.db)
+import login
+
+
 
 root = Tk()
 root.geometry('1000x550')

@@ -6,14 +6,15 @@ def close_login_window(value):
     global flag
     login_window.destroy()
 
-def create_user():
-        conn = pymysql.connect(host='localhost',
-                               user='root',
-                               password='123456',
-                               db='elen_db')
-        cur = conn.cursor()
-        #cur.execute('SELECT ')
-        print(cur.description)
+def create_user(value):
+        #conn = pymysql.connect(host='localhost',
+        #                       user='root',
+        #                       password='123456',
+        #                       db='elen_db')
+        #cur = conn.cursor()
+        cur.execute('INSERT INTO users(user, password) VALUES(%s, %s)', (login.get(), password.get()))
+        conn.commit()
+        #print(cur.description)
 
 
 
@@ -28,10 +29,8 @@ while flag:
     login = StringVar()
     password = StringVar()
 
-
     canv = Canvas(login_window, width=500, height=300)
     canv['bg'] = 'grey90'
-
 
     central_title = Label(login_window,
                           text="{}".format("Розрахунок вартості спожитої електроенергії для однозонного лічильника."),
@@ -53,8 +52,7 @@ while flag:
                             text="{}".format('Зареєструватися'), font="Arial 10",
                             width=15, height=1,
                             bg="grey85", fg="black")
-    but_registrate.bind("<Button-1>", create_user())
-
+    but_registrate.bind("<Button-1>", create_user)
 
 
     central_title.place(x=20, y=10)
