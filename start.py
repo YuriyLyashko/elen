@@ -3,17 +3,18 @@ from datetime import * #tzinfo, date, timedelta
 import pickle
 import urllib.request
 import re
-import pymysql
 import csv
 #import threading #для багатопоточності
 #def start():
 #    t = threading.Thread(target=thred_func)
 
-
 import administration_db
+import login
+
 adm_db = administration_db.AdminDB()
 print(adm_db.conn.db)
-import login
+
+log = login.Login()
 
 
 

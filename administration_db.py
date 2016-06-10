@@ -37,10 +37,15 @@ class AdminDB:
                                     user=self._USER_DB,
                                     password=self._PASSWORD_DB,
                                     db=self._NAME_DB)
+        self.cur = self.conn.cursor()
 
     def create_table(self, name_table):
         self.cur.execute('CREATE TABLE {}('
                          'id integer AUTO_INCREMENT PRIMARY KEY, '
                          'user varchar(20) NOT NULL, '
-                         'password varchar(20) NOT NULL)'
+                         'password varchar(40) NOT NULL)'
                          .format(name_table))
+
+    def create_user(self, user_name, user_password):
+        self.cur.execute('INSERT INTO users(user, password) VALUES(%s, %s)', (user_name, user_password))
+        self.conn.commit()
