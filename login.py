@@ -71,10 +71,18 @@ class Login:
 
     def create_user(self, value):
         adm_db = administration_db.AdminDB()
-        adm_db.create_user(self.login.get(), self.encrypt(self.password.get()))
+        if not adm_db.check_user(self.login.get()):
+            adm_db.create_user(self.login.get(), self.encrypt(self.password.get()))
+            adm_db.close_connection()
+            self.show_report_ok(self.login.get())
+        self.show_report_false(self.login.get())
 
     def encrypt(self, string):
         return hashlib.md5('{}'.format(string).encode('cp1251')).hexdigest()
 
-    def show_report(self, message):
+    def show_report_false(self, message):
         pass
+
+    def show_report_ok(self, message):
+        pass
+
