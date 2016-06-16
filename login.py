@@ -36,7 +36,7 @@ class Login:
                                 text="{}".format("Вхід"), font="Arial 10",
                                 width=15, height=1,
                                 bg="grey85", fg="black")
-            but_logged.bind("<Button-1>", self.close_login_window)
+            but_logged.bind("<Button-1>", self.sing_in)
 
             but_registrate = Button(self.login_window,
                                     text="{}".format('Зареєструватися'), font="Arial 10",
@@ -65,7 +65,8 @@ class Login:
             self.login_window.mainloop()
 
 
-    def close_login_window(self, value):
+    def close_login_window(self):
+        print('close_login_window')
         self.flag = 0
         self.login_window.destroy()
 
@@ -73,6 +74,7 @@ class Login:
         adm_db = administration_db.AdminDB()
         if not adm_db.check_user(self.login.get()):
             adm_db.create_user(self.login.get(), self.encrypt(self.password.get()))
+            adm_db.create_table(self.login.get())
             adm_db.close_connection()
             self.show_report_ok(self.login.get())
         self.show_report_false(self.login.get())
@@ -80,9 +82,19 @@ class Login:
     def encrypt(self, string):
         return hashlib.md5('{}'.format(string).encode('cp1251')).hexdigest()
 
+    def sing_in(self, value):
+        print('sing_in')
+        adm_db = administration_db.AdminDB()
+        if adm_db.check_user(self.login.get()) and adm_db.check_password(self.login.get(), self.encrypt(self.password.get())):
+            self.close_login_window()
+
+
+
     def show_report_false(self, message):
+        print('show_report_false')
         pass
 
     def show_report_ok(self, message):
+        print('show_report_ok')
         pass
 

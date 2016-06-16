@@ -58,7 +58,7 @@ class AdminDB:
 
     def check_password(self, user_name, user_password):
         self.cur.execute('SELECT password FROM users WHERE user="{}"'.format(user_name))
-        password_from_db = self.cur.fetchall()
+        password_from_db = self.cur.fetchone()[0]
         return user_password == password_from_db
 
     def close_connection(self):
