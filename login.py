@@ -91,7 +91,8 @@ class Login:
             adm_db = administration_db.AdminDB()
             if not adm_db.check_user(self.login.get()):
                 adm_db.create_user(self.login.get(), self.encrypt(self.password.get()))
-                adm_db.create_table(self.login.get())
+                adm_db.create_table('history_{}'.format(self.login.get()))
+                adm_db.create_table('log_{}'.format(self.login.get()))
                 adm_db.close_connection()
                 self.show_report('{}, {}'.format(self.login.get(), message_registration_successful))
                 return True

@@ -29,6 +29,8 @@ root['bg'] = 'grey90'
 
 date_now = datetime.strftime(datetime.now(), "%d.%m.%Y") #%H:%M:%S
 
+user_name = StringVar()
+user_name.set(log.login.get())
 date_introduction_fares = StringVar()
 date_introduction_fares.set(date_now)
 
@@ -61,16 +63,21 @@ def save_tariffs(event):
     '''
     print('save_tariffs')
     tariffs = [limit_tariff_1.get(), limit_tariff_2.get(), tariff_1.get(), tariff_2.get(), tariff_3.get(), date_now]
-    with open('fares_start', 'wb') as f:
+    with open('fares_start_{}'.format(user_name.get()), 'wb') as f:
         pickle.dump(tariffs, f)
+    date_fares.set(date_now)
 
 def get_tariffs_local():
     '''
     Завантаження збережених тарифів
     '''
     print('tariffs_local')
-    with open('fares_start', 'rb') as f:
-        return pickle.load(f)
+    try:
+        with open('fares_start_{}'.format(user_name.get()), 'rb') as f:
+            return pickle.load(f)
+    except:
+        with open('fares_start', 'rb') as f:
+            return pickle.load(f)
 
 def get_tariffs_inet(event):
     '''
@@ -89,7 +96,6 @@ def get_tariffs_inet(event):
         tariff_1.set(float(tarifi_all[0])/100)
         tariff_2.set(float(tarifi_all[1])/100)
         tariff_3.set(float(tarifi_all[2])/100)
-        date_fares.set(date_now)
 
     except urllib.error.URLError:
         print('URLError')
@@ -242,6 +248,8 @@ root.title("Розрахунок вартості спожитої електр�
 Central_title = Label(root, text="Розрахунок вартості спожитої електроенергії для однозонного лічильника.",
                               font="Arial 16", bg='grey90')
 
+lab_user_name = Label(root, font="Arial 16", bg='grey90', textvariable=user_name)
+
 #Опис блоку "Спожита електроенергія."
 header_of_block_consumption = Label(root, text="Спожита електроенергія.",
                                             font="Arial 14", bg='grey90')
@@ -262,6 +270,7 @@ ent_amount_of_electricity = Entry(root, width=20, bd=3, textvariable=amount_of_e
 #Опис блоку "Діючі тарифи на електроенергію, грн. за 1 кВтгод."
 header_of_block_fares = Label(root, text="Діючі тарифи на електроенергію, грн. за 1 кВт∙год.",
                                       font="Arial 14", bg='grey90')
+
 lab_pointer_date_saving_fares = Label(root, text="Дата збереження тарифів:",
                                               font="Arial 10", bg='grey90')
 lab_date_saving_fares = Label(root, font="Arial 10", bg='grey90', textvariable=date_fares)
@@ -365,6 +374,8 @@ but_save_in_file.bind("<Button-1>", write_saving_history)
 
 
 Central_title.place(x=50, y=5)
+
+lab_user_name.place(x=850, y=5)
 
 #Розміщення блоку "Спожита електроенергія."
 a = 150
