@@ -12,15 +12,13 @@ class AdminDB:
     def __init__(self):
         try:
             self.connect_db()
-            print('connected')
+            print('connected to', self._NAME_DB)
         except pymysql.err.InternalError:
             try:
                 self.create_db()
-                print('1')
                 self.use_db()
-                print(self._NAME_TABLE_USERS)
                 self.create_table(self._NAME_TABLE_USERS)
-                print('created')
+                print('created table', self._NAME_TABLE_USERS)
             except:
                 raise ConnectionError
 
@@ -38,7 +36,10 @@ class AdminDB:
         self.conn = pymysql.connect(host=self._HOST_DB,
                                     user=self._USER_DB,
                                     password=self._PASSWORD_DB,
-                                    db=self._NAME_DB)
+                                    db=self._NAME_DB,
+                                    use_unicode=True,
+                                    charset="utf8"
+                                    )
         self.cur = self.conn.cursor()
 
     def create_table(self, name_table):

@@ -12,10 +12,12 @@ import administration_db
 import login
 
 adm_db = administration_db.AdminDB()
-print(adm_db.conn.db)
 
 log = login.Login()
 
+
+if log.flag == 1:
+    exit()
 
 
 root = Tk()
