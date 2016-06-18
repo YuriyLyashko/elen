@@ -91,8 +91,18 @@ class Login:
             adm_db = administration_db.AdminDB()
             if not adm_db.check_user(self.login.get()):
                 adm_db.create_user(self.login.get(), self.encrypt(self.password.get()))
-                adm_db.create_table('history_{}'.format(self.login.get()))
-                adm_db.create_table('log_{}'.format(self.login.get()))
+                adm_db.create_table('{}_{}'.format(adm_db._NAME_TABLE_LOG, self.login.get()),
+                                    'date_introduction_fares', 'date_now',
+                                    'limit_tariff_1', 'limit_tariff_2', 'tariff_1', 'tariff_2', 'tariff_3',
+                                    'previous_shows', 'current_shows', 'amount_of_electricity',
+                                    'amount_of_money_in_tariff_1', 'amount_of_money_in_tariff_2', 'amount_of_money_in_tariff_3',
+                                    'total_amount_of_money')
+                adm_db.create_table('{}_{}'.format(adm_db._NAME_TABLE_HISTORY, self.login.get()),
+                                    'date_introduction_fares', 'date_now',
+                                    'limit_tariff_1', 'limit_tariff_2', 'tariff_1', 'tariff_2', 'tariff_3',
+                                    'previous_shows', 'current_shows', 'amount_of_electricity',
+                                    'amount_of_money_in_tariff_1', 'amount_of_money_in_tariff_2', 'amount_of_money_in_tariff_3',
+                                    'total_amount_of_money')
                 adm_db.close_connection()
                 self.show_report('{}, {}'.format(self.login.get(), message_registration_successful))
                 return True

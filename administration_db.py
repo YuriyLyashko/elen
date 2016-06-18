@@ -42,12 +42,23 @@ class AdminDB:
                                     )
         self.cur = self.conn.cursor()
 
-    def create_table(self, name_table):
-        self.cur.execute('CREATE TABLE {}('
-                         'id integer AUTO_INCREMENT PRIMARY KEY, '
-                         'user varchar(20) NOT NULL, '
-                         'password varchar(40) NOT NULL)'.format(name_table)
-                         )
+    def create_table(self, name_table, *args):
+        if not args:
+            self.cur.execute('CREATE TABLE {}('
+                             'id integer AUTO_INCREMENT PRIMARY KEY, '
+                             'user varchar(20) NOT NULL, '
+                             'password varchar(40) NOT NULL)'.format(name_table)
+                             )
+        elif self._NAME_TABLE_LOG in name_table or self._NAME_TABLE_HISTORY in name_table:
+            self.cur.execute('CREATE TABLE {}('
+                             'id integer AUTO_INCREMENT PRIMARY KEY, '
+                             '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL, {} varchar(20) NOT NULL, '
+                             '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL, {} varchar(20) NOT NULL, '
+                             '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL, {} varchar(20) NOT NULL, '
+                             '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL, {} varchar(20) NOT NULL, '
+                             '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL)'
+                             .format(name_table, *args)
+                             )
 
     def create_user(self, user_name, user_password):
         self.cur.execute('INSERT INTO users(user, password) VALUES(%s, %s)', (user_name, user_password))
