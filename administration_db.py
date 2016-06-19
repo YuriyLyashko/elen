@@ -51,12 +51,12 @@ class AdminDB:
                              )
         elif self._NAME_TABLE_LOG in name_table or self._NAME_TABLE_HISTORY in name_table:
             self.cur.execute('CREATE TABLE {}('
-                             'id integer AUTO_INCREMENT PRIMARY KEY, '
+                             #'id integer AUTO_INCREMENT PRIMARY KEY, '
                              '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL, {} varchar(20) NOT NULL, '
                              '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL, {} varchar(20) NOT NULL, '
                              '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL, {} varchar(20) NOT NULL, '
                              '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL, {} varchar(20) NOT NULL, '
-                             '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL)'
+                             '{} varchar(20) NOT NULL, {} varchar(20) NOT NULL, {} varchar(20) NOT NULL)'
                              .format(name_table, *args)
                              )
 
@@ -67,6 +67,12 @@ class AdminDB:
     def check_user(self, user_name):
         self.cur.execute('SELECT user FROM users WHERE user="{}"'.format(user_name))
         return self.cur.fetchall()
+
+    def write_into(self, table, info):
+        print(table)
+        print(info)
+        self.cur.execute('INSERT INTO {} VALUES{}'.format(table, info))
+        self.conn.commit()
 
     def check_password(self, user_name, user_password):
         self.cur.execute('SELECT password FROM users WHERE user="{}"'.format(user_name))

@@ -31,8 +31,8 @@ date_now = datetime.strftime(datetime.now(), "%d.%m.%Y") #%H:%M:%S
 
 user_name = StringVar()
 user_name.set(log.login.get())
-date_introduction_fares = StringVar()
-date_introduction_fares.set(date_now)
+date_meter_readings = StringVar()
+date_meter_readings.set(date_now)
 
 limit_tariff_1 = IntVar()
 limit_tariff_2 = IntVar()
@@ -56,6 +56,7 @@ amount_of_money_in_tariff_3 = DoubleVar()
 total_amount_of_money = StringVar()
 
 calc_end = ()
+type_operation = StringVar()
 
 def save_tariffs(event):
     '''
@@ -160,6 +161,7 @@ def launch_calc(event):
     Функція, що викликається кнопкою "Розрахувати"
     '''
     print('launch_calc')
+    type_operation.set('calculation')
     #Перевірка на коректність внесених даних
     if previous_shows.get() < 0 or current_shows.get() < 0 or limit_tariff_1.get() > limit_tariff_2.get():
         exec(open('error.py').read())
@@ -183,15 +185,16 @@ def write_log(limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3,
     Запис історії розрахунків
     '''
     print('write_log')
-    calc_end = (date_introduction_fares.get(), date_now,
+    calc_end = (date_meter_readings.get(), date_now,
                '%.0f' % (limit_tariff_1), '%.0f' % (limit_tariff_2),
                '%.3f' % (tariff_1), '%.3f' % (tariff_2), '%.3f' % (tariff_3),
                '%.0f' % (previous_shows), '%.0f' % (current_shows), '%.0f' % (amount_of_electricity),
                (amount_of_money_in_tariff_1), (amount_of_money_in_tariff_2), (amount_of_money_in_tariff_3),
-               (total_amount_of_money))
+               (total_amount_of_money), type_operation.get())
     h = open('history.txt', 'a')
     h.write(str(calc_end)+"r \n")
     h.close()
+    adm_db.write_into('{}_{}'.format(adm_db._NAME_TABLE_LOG, log.login.get()), calc_end)
     global calc_end
 
 
@@ -210,6 +213,7 @@ def write_saving_history(event):
     Функція, що викликається кнопкою "Зберегти в файл"
     '''
     print('write_saving_history')
+    type_operation.set('saving')
     if len(calc_end) < 2:
         exec(open('error.py').read())
     else:
@@ -344,8 +348,8 @@ lab_pointer_total_amount_of_money = Label(root, text="Всього:             
                                                   font="Arial 12", bg='grey90')
 lab_total_amount_of_money = Label(root, font="Arial 12", bg='grey90', textvariable=total_amount_of_money)
 
-lab_date_introduction_fares = Label(root, text="Дата занесення показів:", font="Arial 12", bg='grey90')
-ent_date_introduction_fares = Entry(root, width=10, bd=3, textvariable=date_introduction_fares)
+lab_date_meter_readings = Label(root, text="Дата занесення показів:", font="Arial 12", bg='grey90')
+ent_date_meter_readings = Entry(root, width=10, bd=3, textvariable=date_meter_readings)
 
 #Опис кнопки "Розрахувати"
 but_calculation = Button(root,
@@ -444,8 +448,8 @@ lab_amount_of_money_in_tariff_3.place(x = 880, y = e + f * 3)
 lab_pointer_total_amount_of_money.place(x = 800, y = e + f * 4)
 lab_total_amount_of_money.place(x = 880, y = e + f * 4)
 #Розміщення блоку Дата, збереження
-lab_date_introduction_fares.place(x = 500, y = e + f * 5)
-ent_date_introduction_fares.place(x = 700, y = e + f * 5)
+lab_date_meter_readings.place(x = 500, y = e + f * 5)
+ent_date_meter_readings.place(x = 700, y = e + f * 5)
 
 #Розміщення кнопки "Розрахувати"
 but_calculation.place(x = 600, y = a + b * 2)
