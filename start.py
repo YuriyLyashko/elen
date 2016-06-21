@@ -39,7 +39,7 @@ limit_tariff_2 = IntVar()
 tariff_1 = DoubleVar()
 tariff_2 = DoubleVar()
 tariff_3 = DoubleVar()
-date_fares = StringVar()
+date_tariffs = StringVar()
 
 previous_shows = IntVar()
 current_shows = IntVar()
@@ -64,9 +64,9 @@ def save_tariffs(event):
     '''
     print('save_tariffs')
     tariffs = [limit_tariff_1.get(), limit_tariff_2.get(), tariff_1.get(), tariff_2.get(), tariff_3.get(), date_now]
-    with open('fares_start_{}'.format(user_name.get()), 'wb') as f:
+    with open('tariffs_start_{}'.format(user_name.get()), 'wb') as f:
         pickle.dump(tariffs, f)
-    date_fares.set(date_now)
+    date_tariffs.set(date_now)
 
 def get_tariffs_local():
     '''
@@ -74,7 +74,7 @@ def get_tariffs_local():
     '''
     print('tariffs_local')
     try:
-        with open('fares_start_{}'.format(user_name.get()), 'rb') as f:
+        with open('tariffs_start_{}'.format(user_name.get()), 'rb') as f:
             return pickle.load(f)
     except:
         with open('fares_start', 'rb') as f:
@@ -240,7 +240,7 @@ def write_saving_history(event):
         s.writelines(all_lines)
         s.close()
 
-saved_tariffs = limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3, date_fares
+saved_tariffs = limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3, date_tariffs
 #for name_tariff, value in zip(saved_tariffs, (100, 200, 0.55, 1, 2, '01.01.2015')):
 for name_tariff, value in zip(saved_tariffs, get_tariffs_local()):
     name_tariff.set(value)
@@ -257,6 +257,8 @@ lab_user_name = Label(root, font="Arial 16", bg='grey90', textvariable=user_name
 #Опис блоку "Спожита електроенергія."
 header_of_block_consumption = Label(root, text="Спожита електроенергія.",
                                             font="Arial 14", bg='grey90')
+lab_date_meter_readings = Label(root, text="Введіть дату зняття показів:", font="Arial 12", bg='grey90')
+ent_date_meter_readings = Entry(root, width=10, bd=3, textvariable=date_meter_readings)
 lab_previous_shows = Label(root, text="Введіть попередні значення лічильника електроенергії:",
                                    font="Arial 12", bg='grey90')
 lab_current_shows = Label(root, text="Введіть поточні значення лічильника електроенергії:",
@@ -272,12 +274,12 @@ ent_amount_of_electricity = Entry(root, width=20, bd=3, textvariable=amount_of_e
 
 
 #Опис блоку "Діючі тарифи на електроенергію, грн. за 1 кВтгод."
-header_of_block_fares = Label(root, text="Діючі тарифи на електроенергію, грн. за 1 кВт∙год.",
+header_of_block_tariffs = Label(root, text="Діючі тарифи на електроенергію, грн. за 1 кВт∙год.",
                                       font="Arial 14", bg='grey90')
 
-lab_pointer_date_saving_fares = Label(root, text="Дата збереження тарифів:",
+lab_pointer_date_saving_tariffs = Label(root, text="Дата збереження тарифів:",
                                               font="Arial 10", bg='grey90')
-lab_date_saving_fares = Label(root, font="Arial 10", bg='grey90', textvariable=date_fares)
+lab_date_saving_tariffs = Label(root, font="Arial 10", bg='grey90', textvariable=date_tariffs)
 lab_pointer_tariff_1_in = Label(root, text="за обсяг, спожитий до               кВт∙год "\
                                                    "електроенергії на місяць (включно):",
                                         font="Arial 12", bg='grey90')
@@ -348,8 +350,6 @@ lab_pointer_total_amount_of_money = Label(root, text="Всього:             
                                                   font="Arial 12", bg='grey90')
 lab_total_amount_of_money = Label(root, font="Arial 12", bg='grey90', textvariable=total_amount_of_money)
 
-lab_date_meter_readings = Label(root, text="Дата занесення показів:", font="Arial 12", bg='grey90')
-ent_date_meter_readings = Entry(root, width=10, bd=3, textvariable=date_meter_readings)
 
 #Опис кнопки "Розрахувати"
 but_calculation = Button(root,
@@ -385,22 +385,24 @@ lab_user_name.place(x=850, y=5)
 a = 150
 b = 30
 header_of_block_consumption.place(x = 70, y = a + b)
-lab_previous_shows.place(x = 10, y = a + b * 2)
-lab_current_shows.place(x = 10, y = a + b * 3)
-lab_or.place(x = 300, y = a + b * 4)
-lab_amount_of_electricity.place(x = 10, y = a + b * 5)
+lab_date_meter_readings.place(x = 10, y = a + b * 2)
+lab_previous_shows.place(x = 10, y = a + b * 3)
+lab_current_shows.place(x = 10, y = a + b * 4)
+lab_or.place(x = 300, y = a + b * 5)
+lab_amount_of_electricity.place(x = 10, y = a + b * 6)
 
-ent_previous_shows.place(x = 450, y = a + b * 2)
-ent_current_shows.place(x = 450, y = a + b * 3)
-ent_amount_of_electricity.place(x = 450, y = a + b * 5)
+ent_date_meter_readings.place(x = 450, y = a + b * 2)
+ent_previous_shows.place(x = 450, y = a + b * 3)
+ent_current_shows.place(x = 450, y = a + b * 4)
+ent_amount_of_electricity.place(x = 450, y = a + b * 6)
 
 
 #Розміщення блоку "Діючі тарифи на електроенергію, грн. за 1 кВтгод."
 c = 50
 d = 30
-header_of_block_fares.place(x = 70, y = c)
-lab_pointer_date_saving_fares.place(x = 720, y = c)
-lab_date_saving_fares.place(x = 880, y = c)
+header_of_block_tariffs.place(x = 70, y = c)
+lab_pointer_date_saving_tariffs.place(x = 720, y = c)
+lab_date_saving_tariffs.place(x = 880, y = c)
 lab_pointer_tariff_1_in.place(x = 10, y = c + d)
 lab_pointer_tariff_2_in.place(x = 10, y = c + d * 2)
 lab_pointer_tariff_3_in.place(x = 10, y = c + d * 3)
@@ -419,7 +421,7 @@ but_update_via_internet.place(x = 820, y = c + d)
 but_save_tariffs.place(x = 820, y =c + d * 2)
 
 #Розміщення блоку "Розрахунок вартості."
-e = 340
+e = 370
 f = 30
 header_of_block_cost_calculation.place(x = 70, y = e)
 
@@ -448,11 +450,10 @@ lab_amount_of_money_in_tariff_3.place(x = 880, y = e + f * 3)
 lab_pointer_total_amount_of_money.place(x = 800, y = e + f * 4)
 lab_total_amount_of_money.place(x = 880, y = e + f * 4)
 #Розміщення блоку Дата, збереження
-lab_date_meter_readings.place(x = 500, y = e + f * 5)
-ent_date_meter_readings.place(x = 700, y = e + f * 5)
+
 
 #Розміщення кнопки "Розрахувати"
-but_calculation.place(x = 600, y = a + b * 2)
+but_calculation.place(x = 600, y = a + b * 3)
 
 #Розміщення кнопки "Зберегти в файл"
 but_save_in_file.place(x = 800, y = e + f * 5)

@@ -4,10 +4,10 @@ import hashlib
 import administration_db
 
 message_name_is_not_entered = 'Логін не введено.'
-message_name_is_to_long = 'Довжена логіну маєбути меншим, ніж 20 символів.'
+message_name_is_to_long = 'Довжена логіну маєбути меншою, ніж 20 символів.'
 message_name_is_not_alnum = "Логін повинен складатися тільки з буквенно-цифренних символів."
 message_password_is_not_entered = 'Пароль не введено.'
-message_password_is_to_long = 'Довжена паролю маєбути меншим, ніж 20 символів.'
+message_password_is_to_long = 'Довжена паролю маєбути меншою, ніж 20 символів.'
 message_password_is_not_alnum = 'Пароль повинен складатися тільки з буквенно-цифренних символів.'
 message_sing_uo_to_enter = 'Необхідно зареєструватися, щоб увійти.'
 message_name_alredy_exists = 'Користувач із вказаним логіном вже існує.'
@@ -55,7 +55,7 @@ class Login:
                                     bg="grey85", fg="black")
         but_registrate.bind("<Button-1>", self.create_user)
 
-        lab_report = Label(self.login_window, font="Arial 10", bg='grey90', textvariable=self.report_message)
+        lab_report = Label(self.login_window, font="Arial 12", bg='grey90', textvariable=self.report_message)
 
 
         central_title.place(x=20, y=10)
