@@ -69,11 +69,7 @@ class Login:
         ent_password.place(x=a+60, y=b+30)
 
         but_logged.place(x=a+60, y=b+60)
-        but_registrate.place(x=a+300, y=b+12)
-
-        canv.create_line(245, 60, 350, 70, width=2, arrow=LAST)
-        canv.create_line(245, 90, 350, 80, width=2, arrow=LAST)
-        canv.place(x=0, y=0)
+        but_registrate.place(x=a+250, y=b+12)
 
         lab_report.place(relx=0.5, rely=0.7, anchor="center")
 

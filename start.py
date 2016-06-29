@@ -1,9 +1,9 @@
 from tkinter import *
 from datetime import * #tzinfo, date, timedelta
-import pickle
+#import pickle
 import urllib.request
 import re
-import csv
+#import csv
 #import threading #для багатопоточності
 #def start():
 #    t = threading.Thread(target=thred_func)
@@ -25,6 +25,8 @@ root.geometry('1000x550')
 root.resizable(width=False, height=False)
 root['bg'] = 'grey90'
 #root.state("zoomed") #запускаэться у розгорнутому вікні
+
+
 
 
 date_now = datetime.strftime(datetime.now(), "%d.%m.%Y") #%H:%M:%S
@@ -63,9 +65,8 @@ def save_tariffs(event):
     Збереження тарифів оффлайн
     '''
     print('save_tariffs')
-    tariffs = [limit_tariff_1.get(), limit_tariff_2.get(), tariff_1.get(), tariff_2.get(), tariff_3.get(), date_now]
-    with open('tariffs_start_{}'.format(user_name.get()), 'wb') as f:
-        pickle.dump(tariffs, f)
+    tariffs = (user_name.get(), date_now, limit_tariff_1.get(), limit_tariff_2.get(), tariff_1.get(), tariff_2.get(), tariff_3.get())
+    adm_db.update('{}'.format(adm_db._NAME_TABLE_TARIFFS), tariffs)
     date_tariffs.set(date_now)
 
 def get_tariffs_local():
@@ -74,11 +75,9 @@ def get_tariffs_local():
     '''
     print('tariffs_local')
     try:
-        with open('tariffs_start_{}'.format(user_name.get()), 'rb') as f:
-            return pickle.load(f)
+        return adm_db.read_saved_tariffs(user_name.get())
     except:
-        with open('fares_start', 'rb') as f:
-            return pickle.load(f)
+        return adm_db.read_saved_tariffs('starting tariffs')
 
 def get_tariffs_inet(event):
     '''
@@ -191,9 +190,6 @@ def write_log(limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3,
                '%.0f' % (previous_shows), '%.0f' % (current_shows), '%.0f' % (amount_of_electricity),
                (amount_of_money_in_tariff_1), (amount_of_money_in_tariff_2), (amount_of_money_in_tariff_3),
                (total_amount_of_money), type_operation.get())
-    h = open('history.txt', 'a')
-    h.write(str(calc_end)+"r \n")
-    h.close()
     adm_db.write_into('{}_{}'.format(adm_db._NAME_TABLE_LOG, log.login.get()), calc_end)
     global calc_end
 
@@ -240,7 +236,7 @@ def write_saving_history(event):
         s.writelines(all_lines)
         s.close()
 
-saved_tariffs = limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3, date_tariffs
+saved_tariffs = date_tariffs, limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3
 #for name_tariff, value in zip(saved_tariffs, (100, 200, 0.55, 1, 2, '01.01.2015')):
 for name_tariff, value in zip(saved_tariffs, get_tariffs_local()):
     name_tariff.set(value)
