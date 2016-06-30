@@ -15,7 +15,6 @@ adm_db = administration_db.AdminDB()
 
 log = login.Login()
 
-
 if log.flag == 1:
     exit()
 
@@ -25,8 +24,6 @@ root.geometry('1000x550')
 root.resizable(width=False, height=False)
 root['bg'] = 'grey90'
 #root.state("zoomed") #запускаэться у розгорнутому вікні
-
-
 
 
 date_now = datetime.strftime(datetime.now(), "%d.%m.%Y") #%H:%M:%S
@@ -60,6 +57,17 @@ total_amount_of_money = StringVar()
 calc_end = ()
 type_operation = StringVar()
 
+
+def to_write_log(f):
+    def wrapper(*args):
+        res = f(*args)
+        type_operation.set(f.__name__)
+        write_log()
+        return res
+    return wrapper
+
+
+@to_write_log
 def save_tariffs(event):
     '''
     Збереження тарифів оффлайн
@@ -69,6 +77,8 @@ def save_tariffs(event):
     adm_db.update('{}'.format(adm_db._NAME_TABLE_TARIFFS), tariffs)
     date_tariffs.set(date_now)
 
+
+@to_write_log
 def get_tariffs_local():
     '''
     Завантаження збережених тарифів
@@ -79,6 +89,8 @@ def get_tariffs_local():
     except:
         return adm_db.read_saved_tariffs('starting tariffs')
 
+
+@to_write_log
 def get_tariffs_inet(event):
     '''
     Отримання тарифів з сайту Київенерго
@@ -104,6 +116,8 @@ def get_tariffs_inet(event):
         print('ValueError')
         exec(open('error.py').read())
 
+
+@to_write_log
 def calc(amount_of_electricity_in_tariff_1, amount_of_electricity_in_tariff_2, amount_of_electricity_in_tariff_3,
              amount_of_money_in_tariff_1, amount_of_money_in_tariff_2, amount_of_money_in_tariff_3,
              total_amount_of_money):
@@ -147,20 +161,12 @@ def calc(amount_of_electricity_in_tariff_1, amount_of_electricity_in_tariff_2, a
     else:
         exec(open('error.py').read())
 
-    write_log(limit_tariff_1.get(), limit_tariff_2.get(),
-              tariff_1.get(), tariff_2.get(), tariff_3.get(),
-              previous_shows.get(), current_shows.get(), amount_of_electricity.get(),
-              amount_of_money_in_tariff_1.get(), amount_of_money_in_tariff_2.get(), amount_of_money_in_tariff_3.get(),
-              total_amount_of_money.get()
-              )
-
 
 def launch_calc(event):
     '''
     Функція, що викликається кнопкою "Розрахувати"
     '''
     print('launch_calc')
-    type_operation.set('calculation')
     #Перевірка на коректність внесених даних
     if previous_shows.get() < 0 or current_shows.get() < 0 or limit_tariff_1.get() > limit_tariff_2.get():
         exec(open('error.py').read())
@@ -176,20 +182,17 @@ def launch_calc(event):
              total_amount_of_money)
 
 
-def write_log(limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3,
-              previous_shows, current_shows, amount_of_electricity,
-              amount_of_money_in_tariff_1, amount_of_money_in_tariff_2, amount_of_money_in_tariff_3,
-              total_amount_of_money):
+def write_log():
     '''
     Запис історії розрахунків
     '''
     print('write_log')
     calc_end = (date_meter_readings.get(), date_now,
-               '%.0f' % (limit_tariff_1), '%.0f' % (limit_tariff_2),
-               '%.3f' % (tariff_1), '%.3f' % (tariff_2), '%.3f' % (tariff_3),
-               '%.0f' % (previous_shows), '%.0f' % (current_shows), '%.0f' % (amount_of_electricity),
-               (amount_of_money_in_tariff_1), (amount_of_money_in_tariff_2), (amount_of_money_in_tariff_3),
-               (total_amount_of_money), type_operation.get())
+               '%.0f' % (limit_tariff_1.get()), '%.0f' % (limit_tariff_2.get()),
+               '%.3f' % (tariff_1.get()), '%.3f' % (tariff_2.get()), '%.3f' % (tariff_3.get()),
+               '%.0f' % (previous_shows.get()), '%.0f' % (current_shows.get()), '%.0f' % (amount_of_electricity.get()),
+               (amount_of_money_in_tariff_1.get()), (amount_of_money_in_tariff_2.get()), (amount_of_money_in_tariff_3.get()),
+               (total_amount_of_money.get()), type_operation.get())
     adm_db.write_into('{}_{}'.format(adm_db._NAME_TABLE_LOG, log.login.get()), calc_end)
     global calc_end
 
@@ -204,6 +207,8 @@ def sortByAlphabet_Year(inputStr):
 #    print(inputStr[8:12])
     return inputStr[8:12]
 
+
+@to_write_log
 def write_saving_history(event):
     '''
     Функція, що викликається кнопкою "Зберегти в файл"
