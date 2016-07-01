@@ -1,4 +1,6 @@
 import pymysql
+import openpyxl
+
 
 class AdminDB:
     _NAME_DB = 'elen_db'
@@ -88,7 +90,7 @@ class AdminDB:
                              'date_now DATE NOT NULL, '
                              .format(name_table)
                              +
-                             str([arg + ' varchar(20) NOT NULL' for arg in args])[1:-1].replace("'", "")
+                             str([arg + ' DECIMAL(10,2) NOT NULL' for arg in args])[1:-1].replace("'", "")
                              +
                              ')'
                              )
@@ -148,8 +150,29 @@ class AdminDB:
         self.cur.execute('SELECT * FROM {} ORDER BY {}'
                          .format(table, column_name)
                          )
-        self.conn.commit()
         print(self.cur.fetchall())
+
+    def read_all_from(self, table):
+        print('read_all_from', table)
+        self.cur.execute('SELECT * FROM {}'.format(table))
+        data_from_db = self.cur.fetchall()
+        return data_from_db
+
+
+    def export_history_to_excel(self, table, date):
+        print('export_in_excel_db', table)
+        data_from_db = self.read_all_from(table)
+        print('data_from_db', data_from_db)
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = '{}'.format(table)
+        i = 3
+        for tuple in data_from_db:
+            ws['B{}'.format(i)], ws['C{}'.format(i)], ws['D{}'.format(i)] = tuple[0], tuple[-5], tuple[-1]
+            i += 1
+        wb.save('elen_export_{}_{}.xlsx'.format(table, date))
+
+
 
     def close_connection(self):
         print('close_connection')

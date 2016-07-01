@@ -98,7 +98,7 @@ class Login:
                                     'previous_shows', 'current_shows', 'amount_of_electricity',
                                     'amount_of_money_in_tariff_1', 'amount_of_money_in_tariff_2', 'amount_of_money_in_tariff_3',
                                     'total_amount_of_money',
-                                    'type_operation')
+                                    )
                 adm_db.close_connection()
                 self.show_report('{}, {}'.format(self.login.get(), message_registration_successful))
                 return True

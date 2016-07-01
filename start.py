@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter.filedialog import *
 from datetime import * #tzinfo, date, timedelta
 import urllib.request
 import re
@@ -213,7 +214,18 @@ def write_saving_history(event):
     Функція, що викликається кнопкою "Зберегти в файл"
     '''
     print('write_saving_history')
-    adm_db.update('{}_{}'.format(adm_db._NAME_TABLE_HISTORY, log.login.get()), calc_end)
+    adm_db.update('{}_{}'.format(adm_db._NAME_TABLE_HISTORY, log.login.get()), calc_end[:-1])
+
+#@to_write_log
+def export_to_excel(event):
+    '''
+    Функція, що викликається кнопкою "Export to Excel"
+    '''
+    print('export_to_excel_start')
+    #sa = asksaveasfilename()
+    adm_db.export_history_to_excel('{}_{}'.format(adm_db._NAME_TABLE_HISTORY, log.login.get()),
+                                   datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M-%S")
+                                   )
 
 
 saved_tariffs = date_tariffs, limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3
@@ -336,17 +348,17 @@ but_calculation.bind("<Button-1>", launch_calc)
 
 #Опис кнопки "Зберегти внесені дані в файл"
 but_save_in_file = Button(root,
-                                  text="Зберегти в файл", font="Arial 10",
-                                  width=15, height=1,
-                                  bg="lightgreen", fg="blue")
+                          text="Зберегти в історію", font="Arial 10",
+                          width=15, height=1,
+                          bg="lightgreen", fg="blue")
 but_save_in_file.bind("<Button-1>", write_saving_history)
 
-#Опис кнопки "Показати графік"
-#but2 = Button(root,
-#          text="Показати графік споживання", font="Arial 10",
-#          width=25,height=1,
-#          bg="lightgreen",fg="blue")
-#but2.bind("<Button-1>",graph)
+#Опис кнопки "Export to Excel"
+but2 = Button(root,
+              text="Export history to Excel", font="Arial 10",
+              width=25, height=1,
+              bg="lightgreen",fg="blue")
+but2.bind("<Button-1>", export_to_excel)
 
 
 
@@ -435,7 +447,6 @@ but_calculation.place(x = 600, y = a + b * 3)
 but_save_in_file.place(x = 800, y = e + f * 5)
 
 #Розміщення кнопки "Показати графік"
-#but2.place(x=800,y=e+f*6)
+but2.place(x=500,y=e+f*5)
 
 root.mainloop()
-
