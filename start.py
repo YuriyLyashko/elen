@@ -1,6 +1,5 @@
 from tkinter import *
 from datetime import * #tzinfo, date, timedelta
-#import pickle
 import urllib.request
 import re
 #import csv
@@ -26,7 +25,7 @@ root['bg'] = 'grey90'
 #root.state("zoomed") #запускаэться у розгорнутому вікні
 
 
-date_now = datetime.strftime(datetime.now(), "%d.%m.%Y") #%H:%M:%S
+date_now = datetime.strftime(datetime.now(), "%Y-%m-%d") #%H:%M:%S
 
 user_name = StringVar()
 user_name.set(log.login.get())
@@ -52,7 +51,7 @@ amount_of_money_in_tariff_1 = DoubleVar()
 amount_of_money_in_tariff_2 = DoubleVar()
 amount_of_money_in_tariff_3 = DoubleVar()
 
-total_amount_of_money = StringVar()
+total_amount_of_money = DoubleVar()
 
 calc_end = ()
 type_operation = StringVar()
@@ -73,8 +72,13 @@ def save_tariffs(event):
     Збереження тарифів оффлайн
     '''
     print('save_tariffs')
-    tariffs = (user_name.get(), date_now, limit_tariff_1.get(), limit_tariff_2.get(), tariff_1.get(), tariff_2.get(), tariff_3.get())
-    adm_db.update('{}'.format(adm_db._NAME_TABLE_TARIFFS), tariffs)
+    adm_db.update('{}'.format(adm_db._NAME_TABLE_TARIFFS),
+                  (user_name.get(),
+                   date_now,
+                   limit_tariff_1.get(), limit_tariff_2.get(),
+                   tariff_1.get(), tariff_2.get(), tariff_3.get()
+                   )
+                  )
     date_tariffs.set(date_now)
 
 
@@ -118,9 +122,7 @@ def get_tariffs_inet(event):
 
 
 @to_write_log
-def calc(amount_of_electricity_in_tariff_1, amount_of_electricity_in_tariff_2, amount_of_electricity_in_tariff_3,
-             amount_of_money_in_tariff_1, amount_of_money_in_tariff_2, amount_of_money_in_tariff_3,
-             total_amount_of_money):
+def calc():
     '''
     Математичні дії над введеними даними
     '''
@@ -172,14 +174,10 @@ def launch_calc(event):
         exec(open('error.py').read())
     #Якщо показники лічильника не введені, то використовуємо введену кількість спожитої електроенергії
     elif previous_shows.get() == 0 and current_shows.get() == 0:
-        calc(amount_of_electricity_in_tariff_1, amount_of_electricity_in_tariff_2, amount_of_electricity_in_tariff_3,
-             amount_of_money_in_tariff_1, amount_of_money_in_tariff_2, amount_of_money_in_tariff_3,
-             total_amount_of_money)
+        calc()
     else:
         amount_of_electricity.set(current_shows.get() - previous_shows.get())
-        calc(amount_of_electricity_in_tariff_1, amount_of_electricity_in_tariff_2, amount_of_electricity_in_tariff_3,
-             amount_of_money_in_tariff_1, amount_of_money_in_tariff_2, amount_of_money_in_tariff_3,
-             total_amount_of_money)
+        calc()
 
 
 def write_log():
@@ -192,7 +190,8 @@ def write_log():
                '%.3f' % (tariff_1.get()), '%.3f' % (tariff_2.get()), '%.3f' % (tariff_3.get()),
                '%.0f' % (previous_shows.get()), '%.0f' % (current_shows.get()), '%.0f' % (amount_of_electricity.get()),
                (amount_of_money_in_tariff_1.get()), (amount_of_money_in_tariff_2.get()), (amount_of_money_in_tariff_3.get()),
-               (total_amount_of_money.get()), type_operation.get())
+               (total_amount_of_money.get()), type_operation.get()
+                )
     adm_db.write_into('{}_{}'.format(adm_db._NAME_TABLE_LOG, log.login.get()), calc_end)
     global calc_end
 
@@ -214,32 +213,8 @@ def write_saving_history(event):
     Функція, що викликається кнопкою "Зберегти в файл"
     '''
     print('write_saving_history')
-    type_operation.set('saving')
-    if len(calc_end) < 2:
-        exec(open('error.py').read())
-    else:
-        h = open('history.txt', 'a')
-        h.write(str(calc_end)+"s \n")
-        h.close()
-        s = open('saves.txt', 'a')
-        #a - дозапис, 'w' - запис, 'r' - читання
-        s.write(str(calc_end)+"\n")
-        s.close()
-        s = open('saves.txt', 'r')
-        all_lines = s.readlines()
-        all_lines.sort(key = sortByAlphabet_Day)
-        all_lines.sort(key = sortByAlphabet_Month)
-        all_lines.sort(key = sortByAlphabet_Year)
-        n = 0
-        while n < len(all_lines)-1:
-            if all_lines[n][2:12] == all_lines[n+1][2:12]:
-                all_lines.pop(n)
-                n = n
-            else:
-                n += 1
-        s = open('saves.txt', 'w')
-        s.writelines(all_lines)
-        s.close()
+    adm_db.update('{}_{}'.format(adm_db._NAME_TABLE_HISTORY, log.login.get()), calc_end)
+
 
 saved_tariffs = date_tariffs, limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3
 #for name_tariff, value in zip(saved_tariffs, (100, 200, 0.55, 1, 2, '01.01.2015')):

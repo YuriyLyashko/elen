@@ -10,7 +10,7 @@ class AdminDB:
     _USER_DB = 'root'
     _PASSWORD_DB = '123456'
 
-    STARTING_TARIFFS = 'starting tariffs', '01.09.2015', 100, 300, 0.5, 1.0, 2.0
+    STARTING_TARIFFS = 'starting tariffs', '2015-09-01', 100, 300, 0.5, 1.0, 2.0
 
     def __init__(self):
         try:
@@ -21,7 +21,6 @@ class AdminDB:
                 self.use_db()
                 self.create_table(self._NAME_TABLE_USERS)
                 self.create_table('{}'.format(self._NAME_TABLE_TARIFFS),
-                                  'date_now',
                                   'limit_tariff_1', 'limit_tariff_2', 'tariff_1', 'tariff_2', 'tariff_3'
                                   )
                 self.write_into('{}'.format(self._NAME_TABLE_TARIFFS),
@@ -52,7 +51,7 @@ class AdminDB:
                                     )
         self.cur = self.conn.cursor()
 
-    def create_table(self, name_table, *args, **kwargs):
+    def create_table(self, name_table, *args):
         print('create_table', name_table)
         if name_table == self._NAME_TABLE_USERS:
             self.cur.execute('CREATE TABLE {}('
@@ -64,14 +63,29 @@ class AdminDB:
         elif name_table == self._NAME_TABLE_TARIFFS:
             self.cur.execute('CREATE TABLE {}('
                              'user varchar(20) NOT NULL PRIMARY KEY, '
+                             'date_now DATE NOT NULL, '
                              .format(name_table)
                              +
                              str([arg + ' varchar(20) NOT NULL' for arg in args])[1:-1].replace("'", "")
                              +
                              ')'
                              )
-        elif self._NAME_TABLE_HISTORY or self._NAME_TABLE_LOG in name_table:
+        elif self._NAME_TABLE_LOG in name_table:
             self.cur.execute('CREATE TABLE {}('
+                             'id MEDIUMINT NOT NULL AUTO_INCREMENT PRIMARY KEY, '
+                             'date_introduction_tariffs DATE NOT NULL, '
+                             'date_now DATE NOT NULL, '
+                             .format(name_table)
+                             +
+                             str([arg + ' varchar(20) NOT NULL' for arg in args])[1:-1].replace("'", "")
+                             +
+                             ')'
+                             )
+        elif self._NAME_TABLE_HISTORY in name_table:
+            self.cur.execute('CREATE TABLE {}('
+                             #'id MEDIUMINT NOT NULL AUTO_INCREMENT, '
+                             'date_introduction_tariffs DATE NOT NULL PRIMARY KEY, '
+                             'date_now DATE NOT NULL, '
                              .format(name_table)
                              +
                              str([arg + ' varchar(20) NOT NULL' for arg in args])[1:-1].replace("'", "")
@@ -89,17 +103,25 @@ class AdminDB:
         self.cur.execute('SELECT user FROM users WHERE user="{}"'.format(user_name))
         return self.cur.fetchall()
 
+    def get_columns_list_without_id(self, table):
+        print('get_columns_list_without_id', table)
+        self.cur.execute('SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS '
+                         'WHERE TABLE_NAME="{}" AND COLUMN_NAME NOT IN ("id")'.format(table)
+                         )
+        columns_list_without_id = '(' + str(self.cur.fetchall())[1:].replace("('", '').replace("',)", '')
+        print(columns_list_without_id)
+        return columns_list_without_id
+
     def write_into(self, table, info):
         print('write_into', table, info)
-        self.cur.execute('INSERT INTO {} VALUES{}'.format(table, info))
+        self.cur.execute('INSERT INTO {} {} VALUES {}'
+                         .format(table, self.get_columns_list_without_id(table), info)
+                         )
         self.conn.commit()
 
     def update(self, table, info):
         print('update', table, info)
-        self.cur.execute('REPLACE INTO {} '
-                         'VALUES {}'
-                         .format(table, info)
-                         )
+        self.cur.execute('REPLACE INTO {} VALUES {}'.format(table, info))
         self.conn.commit()
 
     def check_password(self, user_name, user_password):
@@ -109,8 +131,7 @@ class AdminDB:
                          'WHERE user="{}"'
                          .format(user_name)
                          )
-        password_from_db = self.cur.fetchone()[0]
-        return user_password == password_from_db
+        return self.cur.fetchone()[0]
 
     def read_saved_tariffs(self, user_name):
         print('read_saved_tariffs', user_name)
@@ -121,6 +142,14 @@ class AdminDB:
                          )
         tariffs_from_db = self.cur.fetchone()[1:]
         return tariffs_from_db
+
+    def get_sorted(self, table, column_name):
+        print('sort_by', table, column_name)
+        self.cur.execute('SELECT * FROM {} ORDER BY {}'
+                         .format(table, column_name)
+                         )
+        self.conn.commit()
+        print(self.cur.fetchall())
 
     def close_connection(self):
         print('close_connection')
