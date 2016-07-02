@@ -4,19 +4,35 @@ from datetime import * #tzinfo, date, timedelta
 import urllib.request
 import re
 #import csv
-#import threading #для багатопоточності
+import threading #для багатопоточності
 #def start():
 #    t = threading.Thread(target=thred_func)
 
 import administration_db
 import login
 
-adm_db = administration_db.AdminDB()
 
-log = login.Login()
+def run_db():
+    adm_db = administration_db.AdminDB()
+    global adm_db
+def run_log():
+    log = login.Login()
+    global log
+def run_main():
+    main_window = 1
+def show_error():
+    t4.start()
+
+t1 = threading.Thread(target=run_log(), args=(1,))
+t2 = threading.Thread(target=run_db(), args=(1,))
+t3 = threading.Thread(target=run_db(), args=(1,))
+t4 = threading.Thread(target=exec(open('error.py').read()), args=(1,))
+t1.start()
+t2.start()
 
 if log.flag == 1:
     exit()
+
 
 
 root = Tk()
@@ -116,10 +132,10 @@ def get_tariffs_inet(event):
 
     except urllib.error.URLError:
         print('URLError')
-        exec(open('error.py').read())
+        show_error()
     except ValueError:
         print('ValueError')
-        exec(open('error.py').read())
+        show_error()
 
 
 @to_write_log
@@ -162,7 +178,7 @@ def calc():
                                   amount_of_money_in_tariff_3.get()))
         
     else:
-        exec(open('error.py').read())
+        show_error()
 
 
 def launch_calc(event):
@@ -170,15 +186,18 @@ def launch_calc(event):
     Функція, що викликається кнопкою "Розрахувати"
     '''
     print('launch_calc')
-    #Перевірка на коректність внесених даних
-    if previous_shows.get() < 0 or current_shows.get() < 0 or limit_tariff_1.get() > limit_tariff_2.get():
-        exec(open('error.py').read())
-    #Якщо показники лічильника не введені, то використовуємо введену кількість спожитої електроенергії
-    elif previous_shows.get() == 0 and current_shows.get() == 0:
-        calc()
-    else:
-        amount_of_electricity.set(current_shows.get() - previous_shows.get())
-        calc()
+    try:
+        #Перевірка на коректність внесених даних
+        if previous_shows.get() < 0 or current_shows.get() < 0 or limit_tariff_1.get() > limit_tariff_2.get():
+            show_error()
+        #Якщо показники лічильника не введені, то використовуємо введену кількість спожитої електроенергії
+        elif previous_shows.get() == 0 and current_shows.get() == 0:
+            calc()
+        else:
+            amount_of_electricity.set(current_shows.get() - previous_shows.get())
+            calc()
+    except:
+        show_error()
 
 
 def write_log():
@@ -193,6 +212,7 @@ def write_log():
                (amount_of_money_in_tariff_1.get()), (amount_of_money_in_tariff_2.get()), (amount_of_money_in_tariff_3.get()),
                (total_amount_of_money.get()), type_operation.get()
                 )
+    print(date_meter_readings.get())
     adm_db.write_into('{}_{}'.format(adm_db._NAME_TABLE_LOG, log.login.get()), calc_end)
     global calc_end
 
@@ -208,15 +228,26 @@ def sortByAlphabet_Year(inputStr):
     return inputStr[8:12]
 
 
+def check_date(date):
+    print('check_date', date)
+    res = re.match(r'((20[0-9]\d)-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[0-1]))', date)
+    if res:
+        return True
+    return False
+
+
 @to_write_log
 def write_saving_history(event):
     '''
     Функція, що викликається кнопкою "Зберегти в файл"
     '''
     print('write_saving_history')
-    adm_db.update('{}_{}'.format(adm_db._NAME_TABLE_HISTORY, log.login.get()), calc_end[:-1])
+    if check_date(calc_end[0]):
+        adm_db.update('{}_{}'.format(adm_db._NAME_TABLE_HISTORY, log.login.get()), calc_end[:-1])
+    else:
+        show_error()
 
-#@to_write_log
+@to_write_log
 def export_to_excel(event):
     '''
     Функція, що викликається кнопкою "Export to Excel"
