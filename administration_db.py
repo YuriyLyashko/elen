@@ -121,6 +121,9 @@ class AdminDB:
                          )
         self.conn.commit()
 
+    def del_from(self, table, key):
+        pass
+
     def update(self, table, info):
         print('update', table, info)
         self.cur.execute('REPLACE INTO {} VALUES {}'.format(table, info))
@@ -171,7 +174,6 @@ class AdminDB:
             ws['B{}'.format(i)], ws['C{}'.format(i)], ws['D{}'.format(i)] = tuple[0], tuple[-5], tuple[-1]
             i += 1
         wb.save('elen_export_{}_{}.xlsx'.format(table, date))
-
 
 
     def close_connection(self):

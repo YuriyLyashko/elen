@@ -12,23 +12,12 @@ import administration_db
 import login
 
 
-def run_db():
-    adm_db = administration_db.AdminDB()
-    global adm_db
-def run_log():
-    log = login.Login()
-    global log
-def run_main():
-    main_window = 1
 def show_error():
-    t4.start()
+    t1 = threading.Thread(target=exec(open('error.py').read()))
 
-t1 = threading.Thread(target=run_log(), args=(1,))
-t2 = threading.Thread(target=run_db(), args=(1,))
-t3 = threading.Thread(target=run_db(), args=(1,))
-t4 = threading.Thread(target=exec(open('error.py').read()), args=(1,))
-t1.start()
-t2.start()
+
+log = login.Login()
+adm_db = administration_db.AdminDB()
 
 if log.flag == 1:
     exit()
