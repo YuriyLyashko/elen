@@ -1,5 +1,7 @@
 import pymysql
 import openpyxl
+from openpyxl.styles import Alignment
+import string
 
 
 class AdminDB:
@@ -161,6 +163,26 @@ class AdminDB:
         data_from_db = self.cur.fetchall()
         return data_from_db
 
+    def get_number_for_letter(self, letter):
+        return string.ascii_uppercase.index(letter)
+
+    def get_letter_for_number(self, number):
+        return list(string.ascii_uppercase)[number]
+
+    def set_head_table_in_excel(self, ws, table, start_row_in_excel, column_in_excel):
+        for name_column_in_db in self.get_columns_list_without_id(table)[1:-1].split(', '):
+            ws['{}{}'.format(column_in_excel, start_row_in_excel)] = name_column_in_db
+            column_in_excel = self.get_letter_for_number(self.get_number_for_letter(column_in_excel) + 1)
+
+    def set_body_table_in_excel(self, ws, data_from_db, start_row_in_excel, start_column_in_excel):
+        column_in_excel = start_column_in_excel
+        row_in_excel = start_row_in_excel + 1
+        for row in data_from_db:
+            for value in row:
+                ws['{}{}'.format(column_in_excel, row_in_excel)] = value
+                column_in_excel = self.get_letter_for_number(self.get_number_for_letter(column_in_excel) + 1)
+            column_in_excel = start_column_in_excel
+            row_in_excel += 1
 
     def export_history_to_excel(self, table, date):
         print('export_in_excel_db', table)
@@ -169,12 +191,12 @@ class AdminDB:
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = '{}'.format(table)
-        i = 3
-        for tuple in data_from_db:
-            ws['B{}'.format(i)], ws['C{}'.format(i)], ws['D{}'.format(i)] = tuple[0], tuple[-5], tuple[-1]
-            i += 1
-        wb.save('elen_export_{}_{}.xlsx'.format(table, date))
+        start_row_in_excel = 1
+        start_column_in_excel = 'A'
+        self.set_head_table_in_excel(ws, table, start_row_in_excel, start_column_in_excel)
+        self.set_body_table_in_excel(ws, data_from_db, start_row_in_excel, start_column_in_excel)
 
+        wb.save('elen_export_{}_{}.xlsx'.format(table, date))
 
     def close_connection(self):
         print('close_connection')

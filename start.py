@@ -5,8 +5,7 @@ import urllib.request
 import re
 #import csv
 import threading #для багатопоточності
-#def start():
-#    t = threading.Thread(target=thred_func)
+
 
 import administration_db
 import login
@@ -309,15 +308,15 @@ lab_limit_tariff_2_in = Label(root, font="Arial 12", bg='grey90', textvariable=l
 
 #Опис кнопки "Оновити через інтернет"
 but_update_via_internet = Button(root,
-                                         text="Оновити через інтернет", font="Arial 10",
-                                         width=20, height=1,
+                                         text="Оновити тарифи через інтернет", font="Arial 10",
+                                         width=25, height=1,
                                          bg="grey85", fg="black")
 but_update_via_internet.bind("<Button-1>", get_tariffs_inet)
 
 #Опис кнопки "Зберегти тарифи"
 but_save_tariffs = Button(root,
-                                  text="Зберегти тарифи", font="Arial 10",
-                                  width=15, height=1,
+                                  text="Використовувати ці тарифи \n наступного разу", font="Arial 10",
+                                  width=25, height=2,
                                   bg="grey85", fg="black")
 but_save_tariffs.bind("<Button-1>", save_tariffs)
 
@@ -424,9 +423,9 @@ lab_limit_tariff_1_in.place(x = 205, y = c + d * 2)
 ent_limit_tariff_2_in.place(x = 340, y = c + d * 2)
 lab_limit_tariff_2_in.place(x = 205, y = c + d * 3)
 #Розміщення кнопки "Оновити через інтернет"
-but_update_via_internet.place(x = 820, y = c + d)
+but_update_via_internet.place(x = 790, y = c + d)
 #Розміщення кнопки "Зберегти тарифи"
-but_save_tariffs.place(x = 820, y =c + d * 2)
+but_save_tariffs.place(x = 790, y = c + d * 2)
 
 #Розміщення блоку "Розрахунок вартості."
 e = 370
