@@ -169,20 +169,15 @@ class AdminDB:
     def get_letter_for_number(self, number):
         return list(string.ascii_uppercase)[number]
 
-    def set_head_table_in_excel(self, ws, table, start_row_in_excel, column_in_excel):
-        for name_column_in_db in self.get_columns_list_without_id(table)[1:-1].split(', '):
-            ws['{}{}'.format(column_in_excel, start_row_in_excel)] = name_column_in_db
-            column_in_excel = self.get_letter_for_number(self.get_number_for_letter(column_in_excel) + 1)
+    def set_head_table_in_excel(self, ws, table, start_row_in_excel, start_column_in_excel):
+        for i, name_column_in_db in enumerate(self.get_columns_list_without_id(table)[1:-1].split(', '),
+                                              self.get_number_for_letter(start_column_in_excel)):
+            ws['{}{}'.format(self.get_letter_for_number(i), start_row_in_excel)] = name_column_in_db
 
     def set_body_table_in_excel(self, ws, data_from_db, start_row_in_excel, start_column_in_excel):
-        column_in_excel = start_column_in_excel
-        row_in_excel = start_row_in_excel + 1
-        for row in data_from_db:
-            for value in row:
-                ws['{}{}'.format(column_in_excel, row_in_excel)] = value
-                column_in_excel = self.get_letter_for_number(self.get_number_for_letter(column_in_excel) + 1)
-            column_in_excel = start_column_in_excel
-            row_in_excel += 1
+        for i, row in enumerate(data_from_db, start_row_in_excel + 1):
+            for j, value in enumerate(row, self.get_number_for_letter(start_column_in_excel)):
+                ws['{}{}'.format(self.get_letter_for_number(j), i)] = value
 
     def export_history_to_excel(self, table, date):
         print('export_in_excel_db', table)
