@@ -10,7 +10,6 @@ import threading #для багатопоточності
 import administration_db
 import login
 
-
 def show_error():
     t1 = threading.Thread(target=exec(open('error.py').read()))
 
@@ -21,6 +20,11 @@ adm_db = administration_db.AdminDB()
 if log.flag == 1:
     exit()
 
+message_welcome_user = 'Вітаю, {}!'.format(log.login.get())
+message_tariffs_received_from_inet = 'Тарифи з інтернету отримано'
+message_tariffs_saved = 'Тарифи збережено'
+message_history_saved = 'Розрахунок збережено до історії'
+message_export_to_excel_successful_complete = 'Експорт історії розрахунків в Excel завершено'
 
 
 root = Tk()
@@ -58,6 +62,9 @@ amount_of_money_in_tariff_3 = DoubleVar()
 
 total_amount_of_money = DoubleVar()
 
+message_answer = StringVar()
+message_answer.set('{}'.format(message_welcome_user))
+
 calc_end = ()
 type_operation = StringVar()
 
@@ -85,6 +92,7 @@ def save_tariffs(event):
                    )
                   )
     date_tariffs.set(date_now)
+    message_answer.set('{}'.format(message_tariffs_saved))
 
 
 @to_write_log
@@ -117,6 +125,7 @@ def get_tariffs_inet(event):
         tariff_1.set(float(tarifi_all[0])/100)
         tariff_2.set(float(tarifi_all[1])/100)
         tariff_3.set(float(tarifi_all[2])/100)
+        message_answer.set('{}'.format(message_tariffs_received_from_inet))
 
     except urllib.error.URLError:
         print('URLError')
@@ -232,6 +241,7 @@ def write_saving_history(event):
     print('write_saving_history')
     if check_date(calc_end[0]):
         adm_db.update('{}_{}'.format(adm_db._NAME_TABLE_HISTORY, log.login.get()), calc_end[:-1])
+        message_answer.set('{}'.format(message_history_saved))
     else:
         show_error()
 
@@ -245,6 +255,7 @@ def export_to_excel(event):
     adm_db.export_history_to_excel('{}_{}'.format(adm_db._NAME_TABLE_HISTORY, log.login.get()),
                                    datetime.strftime(datetime.now(), "%Y-%m-%d_%H-%M-%S")
                                    )
+    message_answer.set('{}'.format(message_export_to_excel_successful_complete))
 
 
 saved_tariffs = date_tariffs, limit_tariff_1, limit_tariff_2, tariff_1, tariff_2, tariff_3
@@ -379,6 +390,9 @@ but2 = Button(root,
               bg="lightgreen",fg="blue")
 but2.bind("<Button-1>", export_to_excel)
 
+#Опис повідомлення-відповіді
+lab_message_answer = Label(root, font="Arial 12", fg='red', bg='grey90', textvariable=message_answer)
+
 
 
 
@@ -467,5 +481,8 @@ but_save_in_file.place(x = 800, y = e + f * 5)
 
 #Розміщення кнопки "Показати графік"
 but2.place(x=500,y=e+f*5)
+
+#Розміщення повідомлення-відповіді
+lab_message_answer.place(x=100,y=e+f*5)
 
 root.mainloop()

@@ -1,6 +1,6 @@
 import pymysql
 import openpyxl
-from openpyxl.styles import Alignment
+from openpyxl.chart import BarChart, Reference, Series
 import string
 
 
@@ -163,6 +163,11 @@ class AdminDB:
         data_from_db = self.cur.fetchall()
         return data_from_db
 
+    def get_count_rows(self, table):
+        self.cur.execute('SELECT COUNT(*) FROM {}'.format(table))
+        count_rows_from_db = self.cur.fetchone()[0]
+        return count_rows_from_db
+
     def get_number_for_letter(self, letter):
         return string.ascii_uppercase.index(letter)
 
@@ -170,14 +175,52 @@ class AdminDB:
         return list(string.ascii_uppercase)[number]
 
     def set_head_table_in_excel(self, ws, table, start_row_in_excel, start_column_in_excel):
-        for i, name_column_in_db in enumerate(self.get_columns_list_without_id(table)[1:-1].split(', '),
-                                              self.get_number_for_letter(start_column_in_excel)):
-            ws['{}{}'.format(self.get_letter_for_number(i), start_row_in_excel)] = name_column_in_db
+        columns_list_from_db = self.get_columns_list_without_id(table)[1:-1].split(', ')
+        for number_column, name_column_in_db in enumerate(columns_list_from_db,
+                                                          self.get_number_for_letter(start_column_in_excel)):
+            ws['{}{}'.format(self.get_letter_for_number(number_column), start_row_in_excel)] = name_column_in_db
+        ws.auto_filter.ref = '{}{}:{}{}'.format(start_column_in_excel,
+                                                start_row_in_excel,
+                                                self.get_letter_for_number(
+                                                    self.get_number_for_letter(start_column_in_excel) +
+                                                    len(columns_list_from_db)-1),
+                                                start_row_in_excel + self.get_count_rows(table)
+                                                )
 
     def set_body_table_in_excel(self, ws, data_from_db, start_row_in_excel, start_column_in_excel):
-        for i, row in enumerate(data_from_db, start_row_in_excel + 1):
-            for j, value in enumerate(row, self.get_number_for_letter(start_column_in_excel)):
-                ws['{}{}'.format(self.get_letter_for_number(j), i)] = value
+        for number_row, row in enumerate(data_from_db, start_row_in_excel + 1):
+            for number_column, value in enumerate(row, self.get_number_for_letter(start_column_in_excel)):
+                ws['{}{}'.format(self.get_letter_for_number(number_column), number_row)] = value
+
+    def build_graph_in_excel(self, ws, table, start_row_in_excel, start_column_in_excel):
+        columns_list_from_db = self.get_columns_list_without_id(table)[1:-1].split(', ')
+        count_rows_in_table_db = self.get_count_rows(table)+1
+        start_column_number = self.get_number_for_letter(start_column_in_excel) + 1
+
+        chart = BarChart()
+        chart.title = '{}'.format(table)
+        chart.style = 10
+        #chart.x_axis.title = 'TEst'
+        chart.y_axis.title = 'Percentage'
+
+        cats = Reference(ws,
+                         min_col=start_column_number,
+                         min_row=start_row_in_excel + 1,
+                         max_row='{}'.format(count_rows_in_table_db)
+                         )
+        data1 = Reference(ws,
+                          min_col=10,
+                          min_row=1,
+                          max_row='{}'.format(count_rows_in_table_db)
+                          )
+        data2 = Reference(ws, min_col=14, min_row=1, max_row='{}'.format(count_rows_in_table_db))
+
+        chart.add_data(data1, titles_from_data=True)
+        chart.add_data(data2, titles_from_data=True)
+        chart.set_categories(cats)
+
+        ws.add_chart(chart, 'A15')
+
 
     def export_history_to_excel(self, table, date):
         print('export_in_excel_db', table)
@@ -190,8 +233,10 @@ class AdminDB:
         start_column_in_excel = 'A'
         self.set_head_table_in_excel(ws, table, start_row_in_excel, start_column_in_excel)
         self.set_body_table_in_excel(ws, data_from_db, start_row_in_excel, start_column_in_excel)
-
+        self.build_graph_in_excel(ws, table, start_row_in_excel, start_column_in_excel)
         wb.save('elen_export_{}_{}.xlsx'.format(table, date))
+
+
 
     def close_connection(self):
         print('close_connection')
